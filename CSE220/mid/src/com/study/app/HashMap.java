@@ -11,18 +11,29 @@ public class HashMap{
     }
 
     // hash function
-    public int check(String key){
-        int v = 0;
-
-        for(char c : key.toCharArray()){
-            if(Character.isDigit(c)){
-                v += Character.getNumericValue(c);
-            } else{
-                v += (int) c;
+    public int hash(Node head, String st){
+        if(head == null || st == null) throw new RuntimeException("Invalid SLL or string given");
+        Node n = head;
+        
+        int sum = 0;
+        while(n != null){
+            int idx = -1;
+            for(int i=st.length() - 1; i >= 0; --i){
+                if(n.elem == st.charAt(i)){
+                    idx = i;
+                    break;
+                }
             }
-        }
 
-        return v % 3;
+            sum += idx;
+
+            n = n.next;
+        }
+        
+        int result = sum % 10;
+        if(result < 0) result += 10;
+
+        return result;
     }
 
     public void insert(String key, String value){
