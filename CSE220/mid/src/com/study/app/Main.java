@@ -1,33 +1,17 @@
 package com.study.app;
 
 public class Main{
-
-    public static int conFun(String name){
-        int sum = 0;
-        for(char c : name.toCharArray()){
-            sum += c - 'A' + 1;
-        }
-
-        sum = sum % 10;
-
-        return sum;
-    }
-
     public static void main(String[] args) {
-        String[] S = {
-            "ABC",
-            "EBC",
-            "JKL",
-            "MLK",
-            "BAC"
-        };
+        HashMap ht = new HashMap();
+        ht.insert("Alice", 123456);
+        ht.insert("Bob", 135927);
+        ht.insert("Charlie", 348247);
+        ht.insert("David", 124382);
 
-        int[] EL = new int[S.length];
+        System.out.println("\nHash table after insertions and rehashing:");
+        System.out.println(ht);
 
-        for(int i = 0; i < S.length; ++i){
-            EL[i] = conFun(S[i]);
-
-            System.out.println(S[i] + ": " + EL[i]);
-        }
+        ht.insert("Alice", 123456);
+        ht.search("David");
     }
 }
