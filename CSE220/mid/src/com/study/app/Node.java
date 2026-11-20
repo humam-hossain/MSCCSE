@@ -1,10 +1,10 @@
 package com.study.app;
 
 public class Node {
-    char elem;
+    int elem;
     Node next;
 
-    public Node(char elem) {
+    public Node(int elem) {
         this.elem = elem;
         this.next = null;
     }

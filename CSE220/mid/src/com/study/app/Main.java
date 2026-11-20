@@ -1,35 +1,34 @@
 package com.study.app;
 
-import java.util.Scanner;
-
 public class Main{
-    public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-        
-        int numInputs = in.nextInt();
-        int[] inputs = new int[numInputs];
+    public static Stack conditional_reverse(Stack stack){
+        Stack temp = new Stack();
 
-        for(int i = 0; i < numInputs; ++i){
-            inputs[i] = in.nextInt();
-        }
+        while(!stack.isEmpty()){
+            int value = stack.pop();
 
-        in.close();
-
-        HashMap ht = new HashMap();
-
-        int result = -1;
-        int minimum = Integer.MAX_VALUE;
-
-        for(int i=0; i < inputs.length; ++i){
-            int diff = ht.insert(inputs[i], i);
-            if(diff < minimum) {
-                result = inputs[i];
-                minimum = diff;
+            if(temp.isEmpty() || temp.peek() != value){
+                temp.push(value);
             }
         }
 
-        System.out.println(ht);
+        return temp;
+    }
 
-        System.out.println(result);
+    public static void main(String[] args) {
+        Stack s = new Stack();
+
+        s.push(10);
+        s.push(10);
+        s.push(20);
+        s.push(20);
+        s.push(30);
+        s.push(10);
+        s.push(50);
+
+        System.out.println(s);
+
+        System.out.println("\n\nconditional reverse");
+        System.out.println(conditional_reverse(s));
     }
 }
