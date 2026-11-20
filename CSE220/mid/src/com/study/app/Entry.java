@@ -1,11 +1,11 @@
 package com.study.app;
 
 public class Entry {
-    String key;
+    int key;
     int value;
     Entry next;
 
-    public Entry(String key, int value) {
+    public Entry(int key, int value) {
         this.key = key;
         this.value = value;
         this.next = null;

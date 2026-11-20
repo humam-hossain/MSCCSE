@@ -1,17 +1,35 @@
 package com.study.app;
 
+import java.util.Scanner;
+
 public class Main{
     public static void main(String[] args) {
-        HashMap ht = new HashMap();
-        ht.insert("Alice", 123456);
-        ht.insert("Bob", 135927);
-        ht.insert("Charlie", 348247);
-        ht.insert("David", 124382);
+        Scanner in = new Scanner(System.in);
+        
+        int numInputs = in.nextInt();
+        int[] inputs = new int[numInputs];
 
-        System.out.println("\nHash table after insertions and rehashing:");
+        for(int i = 0; i < numInputs; ++i){
+            inputs[i] = in.nextInt();
+        }
+
+        in.close();
+
+        HashMap ht = new HashMap();
+
+        int result = -1;
+        int minimum = Integer.MAX_VALUE;
+
+        for(int i=0; i < inputs.length; ++i){
+            int diff = ht.insert(inputs[i], i);
+            if(diff < minimum) {
+                result = inputs[i];
+                minimum = diff;
+            }
+        }
+
         System.out.println(ht);
 
-        ht.insert("Alice", 123456);
-        ht.search("David");
+        System.out.println(result);
     }
 }

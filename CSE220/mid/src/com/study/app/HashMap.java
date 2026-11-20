@@ -1,77 +1,41 @@
 package com.study.app;
 
 public class HashMap{
-    private final int MAX_TABLE_SIZE = 5;
     private Entry[] table; 
     private int size;
 
-    public HashMap(){
-        this.table = new Entry[this.MAX_TABLE_SIZE];
+    public HashMap(int size){
+        this.table = new Entry[size];
         this.size = 0;
     }
 
-    // hash function
-    public int hash(String name){
-        int sum = 0;
-        for(char c : name.toCharArray()){
-            sum += (int) c;
-        }
-
-        if(sum % 2 == 0){
-            return (sum / 2) % this.table.length;
-        }
-
-        return sum % this.table.length;
+    public HashMap(){
+        this(100);
     }
 
-    public void insert(String name, int id){
-        if(name == null) throw new RuntimeException("name or id or both invalid");
+    // hash function
+    public int hash(int key){
+        return key % this.table.length;
+    }
 
-        Entry newEntry = new Entry(name, id);
+    public int insert(int key, int value){
+        Entry newEntry = new Entry(key, value);
 
-        int idx = this.hash(name);
+        int idx = this.hash(key);
+        int result = Integer.MAX_VALUE;
 
         if(this.table[idx] == null){
             this.table[idx] = newEntry;
-        }else{
+        } else if (this.table[idx].next == null){
             Entry e = this.table[idx];
-            Entry p = this.table[idx];
+            e.next = newEntry;
 
-            while(e != null){
-                if(e.key == name){
-                    System.out.println("Student already exists");
-
-                    return;
-                }
-
-                p = e;
-                e = e.next;
-            }
-
-            p.next = newEntry;
+            if(e.key == key) result = value - e.value;
         }
 
         this.size++;
-    }
 
-    public int search(String name){
-        if(name == null) throw new RuntimeException("Invalid name");
-
-        int idx = this.hash(name);
-
-        Entry e = this.table[idx];
-
-        while(e != null){
-            if(e.key == name){
-                System.out.println("ID of " + name + " is " + e.value);
-                return e.value;
-            }
-
-            e = e.next;
-        }
-
-        System.out.println(name + " Not found");
-        return -1;
+        return result;
     }
 
     @Override 
@@ -91,8 +55,6 @@ public class HashMap{
                 }
 
                 text += "\n";
-            }else{
-                text += i + ": None\n";
             }
         }
 
