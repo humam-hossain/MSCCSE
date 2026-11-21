@@ -434,6 +434,7 @@ public class Main {
         countSort(arr);
     }
 
+    // karatsuba
     public static long karatsuba(long x, long y){
         if(x < 0 || y < 0){
             long sign = ((x < 0) ^ (y < 0)) ? -1 : 1;
@@ -460,10 +461,18 @@ public class Main {
         return a * power * power + (c - a - b) * power + b;
     }
 
-    public static void main(String[] args) {
+    public static void testKaratsuba() {
         long x = 1234;
         long y = 5678;
 
         System.out.println(karatsuba(x, y));
+    }
+
+    // max sum subarray
+    public static void maxSumSubArray(int[] arr, int start, int end){
+    }
+
+    public static void main(String[] args) {
+
     }
 }
