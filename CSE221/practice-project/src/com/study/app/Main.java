@@ -404,7 +404,7 @@ public class Main {
         displayArray(result);
     }
 
-    public static void main(String[] args) {
+    public static void testSorting() {
         int[] arr; 
         arr = new int[]{45, 11, 0, -2, -9};
 
@@ -432,5 +432,38 @@ public class Main {
 
         arr = new int[]{45, 11, 0, 2, 9};
         countSort(arr);
+    }
+
+    public static long karatsuba(long x, long y){
+        if(x < 0 || y < 0){
+            long sign = ((x < 0) ^ (y < 0)) ? -1 : 1;
+            return sign * karatsuba(Math.abs(x), Math.abs(y));
+        }
+
+        if(x < 10 || y < 10){
+            return x * y;
+        }
+
+        long n = String.valueOf(x).length() >  String.valueOf(y).length() ? String.valueOf(x).length() : String.valueOf(y).length();
+        long m = (n + 1) / 2;
+        long power = (long) Math.pow(10, m);
+
+        long xL = x / power;
+        long xR = x % power;
+        long yL = y / power;
+        long yR = y % power;
+
+        long a = karatsuba(xL, yL);
+        long b = karatsuba(xR, yR);
+        long c = karatsuba(xL+xR, yL+yR);
+
+        return a * power * power + (c - a - b) * power + b;
+    }
+
+    public static void main(String[] args) {
+        long x = 1234;
+        long y = 5678;
+
+        System.out.println(karatsuba(x, y));
     }
 }
