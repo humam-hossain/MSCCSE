@@ -108,6 +108,14 @@ public class Main {
         System.out.println(bipartite(g, V[0]));
     }
 
+    public static void displayArray(int[] arr){
+        for(int i = 0; i < arr.length; ++i){
+            System.out.print(arr[i] + " ");
+        }
+        System.out.println();
+    }
+
+    // searching algorithms
     public static boolean linearSearch(String[] arr, String item){
         for(int i=0; i<arr.length; ++i){
             if(arr[i].equals(item)){
@@ -123,8 +131,8 @@ public class Main {
             return false;
         }
 
-        if(arr[i] == item) return true;
-        else return linearSearch(arr, item, ++i);
+        if(arr[i].equals(item)) return true;
+        else return linearSearch(arr, item, i + 1);
     }
 
     public static void linearSearchPractice(){
@@ -195,10 +203,234 @@ public class Main {
         return false;
     }
 
-    public static void main(String[] args) {
-        int[] arr = {1, 7, 12, 33, 34, 58, 60, 66, 77, 87};
+    // sorting algorithms
+    public static void bubbleSort(int[] arr){
+        int swapCount = 0;
+        for(int i=0; i < arr.length; ++i){
+            boolean swapped = false;
+            for(int j=0; j < arr.length - i - 1; ++j){
+                if(arr[j] > arr[j+1]){
+                    int temp = arr[j + 1];
+                    arr[j + 1] = arr[j];
+                    arr[j] = temp;
 
-        boolean result = ternarySearch(arr, 7, 0, arr.length - 1);
-        System.out.println(result);
+                    swapped = true;
+                    swapCount++;
+                }
+            }
+
+            if(!swapped) break;
+        }
+
+        System.out.println("Bubble Sort swapcount: " + swapCount);
+        displayArray(arr);
+    }
+
+    public static void selectionSort(int[] arr){
+        int swapCount = 0;
+        for(int i=0; i < arr.length; ++i){
+            int min_idx = i;
+
+            for(int j=i; j < arr.length; ++j){
+                if(arr[j] < arr[min_idx]){
+                    min_idx = j;
+                }
+            }
+
+            //swap
+            if(min_idx != i){
+                int temp = arr[min_idx];
+                arr[min_idx] = arr[i];
+                arr[i] = temp;
+
+                swapCount++;
+            }
+        }
+
+        System.out.println("SelectionSort swapCount = " + swapCount);
+        displayArray(arr);
+    }
+
+    public static void insertionSort(int[] arr){
+        int swapCount = 0;
+
+        for(int i = 1; i < arr.length; ++i){
+            int key = arr[i];
+            int j = i - 1;
+
+            while(j >= 0 && key < arr[j]){
+                arr[j+1] = arr[j];
+                j--;
+
+            }
+            arr[j+1] = key;
+        }
+
+        System.out.println("insertionSort swapCount: " + swapCount);
+        displayArray(arr);
+    }
+
+    // merge sort
+    public static int[] merge(int[] left, int[] right){
+        int[] a = new int[left.length + right.length];
+
+        int i = 0;
+        int j = 0;
+        int k = 0;
+
+        while(i < left.length && j < right.length){
+            if(left[i] <= right[j]){
+                a[k] = left[i];
+                i++;
+            }else{
+                a[k] = right[j];
+                j++;
+            }
+
+            k++;
+        }
+
+        while(i < left.length){
+            a[k] = left[i];
+            i++;
+            k++;
+        }
+
+        while(j < right.length){
+            a[k] = right[j];
+            j++;
+            k++;
+        }
+
+        return a;
+    }
+
+    public static int[] mergeSort(int[] arr){
+        if(arr.length <= 1){
+            return arr;
+        }
+
+        int mid = arr.length / 2;
+
+        int[] leftArr = new int[mid];
+        int[] rightArr = new int[arr.length - mid];
+
+        for(int i=0; i < arr.length; ++i){
+            if(i < mid){
+                leftArr[i] = arr[i];
+            }else{
+                rightArr[i - mid] = arr[i];
+            }
+        }
+
+        int[] left = mergeSort(leftArr);
+        int[] right = mergeSort(rightArr);
+
+        return merge(left, right);
+    }
+
+    // quick sort
+    public static int quickSwaps = 0;
+    public static int partition(int[] arr, int start, int end){
+        int pivot = arr[end];
+        int pIndex = start;
+
+        for(int i = start; i < end; ++i){
+            if(arr[i] < pivot){
+                if(i != pIndex){
+                    // swap
+                    int temp = arr[i];
+                    arr[i] = arr[pIndex];
+                    arr[pIndex] = temp;
+                    quickSwaps++;
+                }
+
+                pIndex++;
+            }
+        }
+
+        if(end != pIndex){
+            int temp = arr[end];
+            arr[end] = arr[pIndex];
+            arr[pIndex] = temp;
+            quickSwaps++;
+        }
+
+        return pIndex;
+    }
+
+    public static int[] quickSort(int[] arr, int start, int end){
+        if(start >= end){
+            return arr;
+        }
+
+        int pIndex = partition(arr, start, end);
+        quickSort(arr, start, pIndex - 1);
+        quickSort(arr, pIndex + 1, end);
+
+        return arr;
+    }
+
+    public static void countSort(int[] arr){
+        int max = arr[0];
+        for(int i=0; i < arr.length; ++i){
+            if(arr[i] > max){
+                max = arr[i];
+            }
+        }
+
+        int[] result = new int[arr.length];
+        int[] count = new int[max + 1];
+        int[] cu = new int[max + 1];
+
+        for(int i=0; i < count.length; ++i){
+            count[i] = 0;
+            cu[i] = 0;
+        }
+
+        for(int i=0; i < arr.length; ++i){
+            count[arr[i]]++;
+        }
+
+        cu[0] = count[0]; 
+        for(int i=1; i < count.length; ++i){
+            cu[i] = cu[i-1] + count[i];
+        }
+
+        for(int i=arr.length-1; i >= 0; --i){
+            result[--cu[arr[i]]] = arr[i];
+        }
+
+        displayArray(result);
+    }
+
+    public static void main(String[] args) {
+        int[] arr; 
+        arr = new int[]{45, 11, 0, -2, -9};
+
+        displayArray(arr);
+
+        arr = new int[]{45, 11, 0, -2, -9};
+        bubbleSort(arr);
+
+        arr = new int[]{45, 11, 0, -2, -9};
+        selectionSort(arr);
+
+        arr = new int[]{45, 11, 0, -2, -9};
+        insertionSort(arr);
+
+        System.out.println("Merge Sort");
+        arr = new int[]{45, 11, 0, -2, -9};
+        arr = mergeSort(arr);
+        displayArray(arr);
+
+        System.out.println("Quick Sort");
+        arr = new int[]{45, 11, 0, -2, -9};
+        quickSort(arr, 0, arr.length - 1);
+        System.out.println("QuickSwaps: " + quickSwaps);
+        displayArray(arr);
+
+        arr = new int[]{45, 11, 0, 2, 9};
+        countSort(arr);
     }
 }
