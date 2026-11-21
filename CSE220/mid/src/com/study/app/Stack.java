@@ -38,11 +38,7 @@ public class Stack {
         Node n = this.top;
 
         while(n  != null){
-            text += n.elem + "\n";
-
-            int length = String.valueOf(n.elem).length();
-            text += " ".repeat(length/2 - 1); 
-            text += "⬇\n";
+            text += "|" + n.elem + "|\n";
 
             n = n.next;
         }
