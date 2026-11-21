@@ -87,7 +87,7 @@ public class Main {
         return true;
     }
 
-    public static void main(String[] args) {
+    public static void bfsPractive(){
         String[] V = {"r", "s", "t", "u", "v", "w", "x", "y"};
 
         String[][] E = {
@@ -106,5 +106,36 @@ public class Main {
 
         bfs(g, V[0]);
         System.out.println(bipartite(g, V[0]));
+    }
+
+    public static boolean linearSearch(String[] arr, String item){
+        for(int i=0; i<arr.length; ++i){
+            if(arr[i].equals(item)){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean linearSearch(String[] arr, String item, int i){
+        if(i >= arr.length){
+            return false;
+        }
+
+        if(arr[i] == item) return true;
+        else return linearSearch(arr, item, ++i);
+    }
+
+    public static void main(String[] args) {
+        String[] arr = {
+            "cxc",
+            "dfd",
+            "xyz",
+            "dfd",
+        };
+
+        String item = "efg";
+        System.out.println(linearSearch(arr, item, 0));
     }
 }
