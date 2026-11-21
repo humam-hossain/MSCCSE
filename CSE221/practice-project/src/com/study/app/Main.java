@@ -127,7 +127,7 @@ public class Main {
         else return linearSearch(arr, item, ++i);
     }
 
-    public static void main(String[] args) {
+    public static void linearSearchPractice(){
         String[] arr = {
             "cxc",
             "dfd",
@@ -137,5 +137,48 @@ public class Main {
 
         String item = "efg";
         System.out.println(linearSearch(arr, item, 0));
+    }
+
+    public static boolean binarySearch(int[] arr, int item, int l, int r){
+        while(l <= r){
+            int mid = l + (r - l) / 2;
+
+            if(arr[mid] == item){
+                return true;
+            }else{
+                if(item < arr[mid]){
+                    r = mid - 1;
+                } else{
+                    l = mid + 1;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean recurrBinarySearch(int[] arr, int item, int l, int r){
+        if(l <= r){
+            int mid = l + (r - l) / 2;
+
+            if(arr[mid] == item) {
+                return true;
+            } else{
+                if(item < arr[mid]){
+                    return recurrBinarySearch(arr, item, l, mid - 1);
+                }else{
+                    return recurrBinarySearch(arr, item, mid + 1, r);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static void main(String[] args) {
+        int[] arr = {7, 12, 34, 58, 87};
+
+        boolean result = recurrBinarySearch(arr, 7, 0, arr.length - 1);
+        System.out.println(result);
     }
 }
