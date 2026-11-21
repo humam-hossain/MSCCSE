@@ -175,10 +175,30 @@ public class Main {
         return false;
     }
 
-    public static void main(String[] args) {
-        int[] arr = {7, 12, 34, 58, 87};
+    public static boolean ternarySearch(int[] arr, int item, int l, int r){
+        while(l <= r){
+            int mid1 = l + (r - l) / 3;
+            int mid2 = r - (r - l) / 3;
 
-        boolean result = recurrBinarySearch(arr, 7, 0, arr.length - 1);
+            if(item == arr[mid1] || item == arr[mid2]){
+                return true;
+            }else if(item < arr[mid1]){
+                r = mid1 - 1;
+            } else if(item > arr[mid2]){
+                l = mid2 + 1;
+            } else{
+                l = mid1 + 1;
+                r = mid2 - 1;
+            }
+        }
+
+        return false;
+    }
+
+    public static void main(String[] args) {
+        int[] arr = {1, 7, 12, 33, 34, 58, 60, 66, 77, 87};
+
+        boolean result = ternarySearch(arr, 7, 0, arr.length - 1);
         System.out.println(result);
     }
 }
