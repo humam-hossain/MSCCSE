@@ -469,7 +469,40 @@ public class Main {
     }
 
     // max sum subarray
-    public static void maxSumSubArray(int[] arr, int start, int end){
+    public static int maxSumSubArray(int[] arr, int start, int end){
+        if(start >= end){
+            return arr[start];
+        }
+
+        int mid = start + (end - start) / 2;
+
+        int leftSum = maxSumSubArray(arr, start, mid);
+        int rightSum = maxSumSubArray(arr, mid + 1, end);
+
+        int sum = 0;
+        int leftCross = Integer.MIN_VALUE;
+        int rightCross = Integer.MIN_VALUE;
+
+        for(int i = mid; i >= start; --i){
+            sum += arr[i];
+            leftCross = Math.max(leftCross, sum);
+        }
+
+        sum = 0;
+        for(int i = mid+1; i <= end; ++i){
+            sum += arr[i];
+            rightCross = Math.max(rightCross, sum);
+        }
+
+        int crossSum = leftCross + rightCross;
+
+        return Math.max(Math.max(leftSum, rightSum), crossSum);
+    }
+
+    public static void testMaxSumSubArray() {
+        int[] arr = {3, -2, 5, -1};
+
+        System.out.println(maxSumSubArray(arr, 0, arr.length - 1));
     }
 
     public static void main(String[] args) {
