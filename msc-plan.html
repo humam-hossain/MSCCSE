@@ -1,0 +1,914 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MSc CSE Data Science: Course and Semester Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+  --paper: #F4F7FA;
+  --grid: rgba(47, 91, 211, 0.06);
+  --surface: #FFFFFF;
+  --surface-2: #EDF1F7;
+  --ink: #15213B;
+  --ink-soft: #4B5A76;
+  --rule: #D5DDE8;
+  --found: #2F5BD3; --found-bg: #E2E9FC; --found-ink: #1E3F9E;
+  --adv: #6B44C2; --adv-bg: #EDE6FA; --adv-ink: #4C2C93;
+  --mand: #B4741A; --mand-bg: #FAEFD9; --mand-ink: #7A4D0F;
+  --thesis: #0D8669; --thesis-bg: #DCF2EA; --thesis-ink: #0A5E4A;
+  --risk: #B53A5D; --risk-bg: #F8E3EA; --risk-ink: #8A2443;
+  --focus: #2F5BD3;
+  --head: "Bricolage Grotesque", "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #0E1626;
+    --grid: rgba(140, 170, 240, 0.05);
+    --surface: #14203A;
+    --surface-2: #1A2844;
+    --ink: #E5EBF5;
+    --ink-soft: #A6B3CA;
+    --rule: #2A3A58;
+    --found: #7F9CF0; --found-bg: #1B2C56; --found-ink: #B9CBF8;
+    --adv: #A98BEB; --adv-bg: #2A2152; --adv-ink: #D3C3F7;
+    --mand: #E3AE55; --mand-bg: #3A2B12; --mand-ink: #F4D49A;
+    --thesis: #4CC7A4; --thesis-bg: #0F3A30; --thesis-ink: #9FE6D0;
+    --risk: #EB7F9E; --risk-bg: #3E1B28; --risk-ink: #F7B8CB;
+    --focus: #9DB4F5;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0E1626;
+  --grid: rgba(140, 170, 240, 0.05);
+  --surface: #14203A;
+  --surface-2: #1A2844;
+  --ink: #E5EBF5;
+  --ink-soft: #A6B3CA;
+  --rule: #2A3A58;
+  --found: #7F9CF0; --found-bg: #1B2C56; --found-ink: #B9CBF8;
+  --adv: #A98BEB; --adv-bg: #2A2152; --adv-ink: #D3C3F7;
+  --mand: #E3AE55; --mand-bg: #3A2B12; --mand-ink: #F4D49A;
+  --thesis: #4CC7A4; --thesis-bg: #0F3A30; --thesis-ink: #9FE6D0;
+  --risk: #EB7F9E; --risk-bg: #3E1B28; --risk-ink: #F7B8CB;
+  --focus: #9DB4F5;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+*, *::before, *::after { box-sizing: inherit; }
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+main { max-width: 62rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+p, li { max-width: 44rem; }
+a { color: var(--found); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible {
+  outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px;
+}
+img { max-width: 100%; }
+
+h1, h2, h3 { font-family: var(--head); color: var(--ink); }
+h1 { font-weight: 800; font-size: clamp(2.3rem, 6vw, 3.8rem); line-height: 1.02; letter-spacing: -0.025em; margin: 0 0 1rem; max-width: 16ch; }
+h2 { font-weight: 700; font-size: clamp(1.6rem, 3.4vw, 2.15rem); line-height: 1.12; letter-spacing: -0.015em; margin: 4rem 0 0.75rem; }
+h3 { font-weight: 700; font-size: 1.3rem; line-height: 1.2; margin: 2rem 0 0.6rem; }
+section { scroll-margin-top: 1rem; }
+.lede { font-size: 1.2rem; color: var(--ink-soft); max-width: 40rem; }
+.muted { color: var(--ink-soft); }
+.small { font-size: 0.9rem; }
+
+/* Hero credit ledger */
+.ledger { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 6px; margin: 2.25rem 0 0.6rem; }
+.cell {
+  min-height: 6.2rem; border-radius: 7px; padding: 0.55rem 0.6rem; border: 1.5px solid;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 0.3rem;
+}
+.cell b { font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+.cell span { font-size: 0.72rem; line-height: 1.2; }
+.cell.thesis { grid-column: span 4; }
+.cell.thesis b { font-size: 1rem; }
+.found-c { background: var(--found-bg); border-color: var(--found); color: var(--found-ink); }
+.adv-c { background: var(--adv-bg); border-color: var(--adv); color: var(--adv-ink); }
+.mand-c { background: var(--mand-bg); border-color: var(--mand); color: var(--mand-ink); }
+.thesis-c { background: var(--thesis-bg); border-color: var(--thesis); color: var(--thesis-ink); }
+.ledger-cap { font-size: 0.9rem; color: var(--ink-soft); margin: 0 0 1rem; }
+@media (max-width: 760px) {
+  .ledger { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .cell { min-height: 4.6rem; }
+}
+@media (max-width: 520px) {
+  .cell span { display: none; }
+  .cell.thesis span { display: block; }
+  .cell b { font-size: 0.74rem; }
+}
+
+.legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin: 0.5rem 0 0; padding: 0; list-style: none; font-size: 0.92rem; }
+.legend li { display: inline-flex; align-items: center; gap: 0.45rem; }
+.swatch { width: 0.95rem; height: 0.95rem; border-radius: 4px; border: 1.5px solid; display: inline-block; }
+
+/* Chips and dots */
+.chip { display: inline-block; padding: 0.08rem 0.55rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; line-height: 1.6; }
+.chip.found { background: var(--found-bg); color: var(--found-ink); }
+.chip.adv { background: var(--adv-bg); color: var(--adv-ink); }
+.chip.mand { background: var(--mand-bg); color: var(--mand-ink); }
+.chip.thesis, .chip.good { background: var(--thesis-bg); color: var(--thesis-ink); }
+.chip.mid { background: var(--mand-bg); color: var(--mand-ink); }
+.chip.bad { background: var(--risk-bg); color: var(--risk-ink); }
+.dots { display: inline-flex; gap: 3px; vertical-align: middle; }
+.dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--rule); display: inline-block; }
+.dots i.on { background: var(--found); }
+
+/* Callouts */
+.callout { border-left: 4px solid; padding: 0.95rem 1.2rem; border-radius: 0 10px 10px 0; margin: 1.25rem 0; max-width: 48rem; }
+.callout p { margin: 0.35rem 0 0; }
+.callout > strong:first-child { display: block; font-family: var(--head); font-size: 1.02rem; }
+.callout.rec { border-color: var(--thesis); background: var(--thesis-bg); }
+.callout.warn { border-color: var(--risk); background: var(--risk-bg); }
+.callout.note { border-color: var(--found); background: var(--found-bg); }
+.callout.tip { border-color: var(--mand); background: var(--mand-bg); }
+
+/* Table of contents */
+.toc { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 1rem 1.25rem; margin: 2rem 0 0; }
+.toc ul { columns: 2 15rem; margin: 0.4rem 0 0; padding-left: 1.1rem; }
+.toc li { margin: 0.15rem 0; break-inside: avoid; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; border: 1px solid var(--rule); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 38rem; font-size: 0.95rem; }
+th, td { text-align: left; padding: 0.65rem 0.85rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+thead th { background: var(--surface-2); font-weight: 600; }
+tbody tr:last-child td, tbody tr:last-child th { border-bottom: none; }
+tbody th { font-weight: 600; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.code { font-weight: 700; white-space: nowrap; }
+
+/* Details */
+details.why { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; margin: 0.5rem 0; max-width: 48rem; }
+details.why summary { cursor: pointer; padding: 0.7rem 1rem; font-weight: 600; list-style-position: outside; margin-left: 1rem; }
+details.why[open] summary { border-bottom: 1px solid var(--rule); }
+details.why .body { padding: 0.4rem 1rem 0.9rem; }
+details.why .body p { margin: 0.5rem 0; }
+
+/* Diagrams */
+.diagram { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 1rem; overflow-x: auto; margin: 1rem 0; }
+.diagram pre.mermaid { margin: 0; background: transparent; text-align: center; }
+.diagram-key { font-size: 0.9rem; color: var(--ink-soft); margin: 0.25rem 0 1rem; }
+
+/* Plan matrix */
+.matrix { display: grid; grid-template-columns: 9rem 1fr 1fr; gap: 6px; margin: 1rem 0 1.5rem; }
+.matrix .hd { font-weight: 600; font-size: 0.92rem; padding: 0.5rem 0.6rem; color: var(--ink-soft); align-self: end; }
+.matrix .rowhd { font-weight: 600; font-size: 0.92rem; padding: 0.6rem; align-self: center; color: var(--ink-soft); }
+.mcell { background: var(--surface); border: 1.5px solid var(--rule); border-radius: 10px; padding: 0.8rem 0.9rem; text-align: left; font: inherit; color: var(--ink); cursor: pointer; }
+.mcell:hover { border-color: var(--ink-soft); }
+.mcell b { font-family: var(--head); font-size: 1.15rem; display: block; }
+.mcell span { display: block; font-size: 0.9rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.mcell.pick { border-color: var(--thesis); box-shadow: inset 0 0 0 1px var(--thesis); }
+@media (max-width: 620px) {
+  .matrix { grid-template-columns: 1fr 1fr; }
+  .matrix .corner { display: none; }
+  .matrix .rowhd { grid-column: 1 / -1; padding: 0.6rem 0 0; }
+}
+
+/* Tabs */
+.tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.5rem 0 1rem; }
+.tab { font: inherit; font-weight: 700; padding: 0.6rem 1rem; border-radius: 10px; border: 1.5px solid var(--rule); background: var(--surface); color: var(--ink); cursor: pointer; text-align: left; line-height: 1.3; }
+.tab small { display: block; font-weight: 500; color: var(--ink-soft); font-size: 0.8rem; }
+.tab[aria-selected="true"] { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.tab[aria-selected="true"] small { color: var(--paper); opacity: 0.85; }
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 1.25rem 1.25rem 1rem; }
+.panel h3 { margin-top: 0.2rem; }
+.panel h4 { font-family: var(--head); font-size: 1.05rem; margin: 1.1rem 0 0.3rem; }
+
+/* Semester timeline */
+.timeline { margin: 1rem 0 1.25rem; }
+.sem { display: grid; grid-template-columns: 8.5rem 1fr; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px dashed var(--rule); }
+.sem:last-child { border-bottom: none; }
+.sem-label b { display: block; font-family: var(--head); font-size: 1.05rem; }
+.sem-label span { font-size: 0.85rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.track { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.blk { border-radius: 8px; padding: 0.5rem 0.65rem; border: 1.5px solid; min-height: 4.1rem; display: flex; flex-direction: column; justify-content: center; }
+.blk b { font-size: 0.9rem; }
+.blk span { font-size: 0.78rem; line-height: 1.25; }
+.blk.s2 { grid-column: span 2; }
+.blk.s4 { grid-column: span 4; }
+.blk.empty { border-style: dashed; border-color: var(--rule); color: var(--ink-soft); background: transparent; align-items: center; text-align: center; font-size: 0.78rem; }
+@media (max-width: 640px) {
+  .sem { grid-template-columns: 1fr; gap: 0.4rem; }
+  .track { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .blk.s4 { grid-column: span 2; }
+  .blk.empty { display: none; }
+}
+
+.pc { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0 0.5rem; }
+.pc > div { border-radius: 10px; padding: 0.8rem 1rem; }
+.pc .pros { background: var(--thesis-bg); }
+.pc .cons { background: var(--risk-bg); }
+.pc h4 { margin: 0 0 0.3rem; font-family: var(--head); font-size: 1rem; }
+.pc ul { margin: 0; padding-left: 1.1rem; }
+.pc li { margin: 0.25rem 0; }
+@media (max-width: 640px) { .pc { grid-template-columns: 1fr; } }
+.why-list { padding-left: 1.2rem; }
+.why-list li { margin: 0.35rem 0; }
+.bestfor { margin: 0.9rem 0 0.2rem; }
+
+/* Steps */
+ol.steps { list-style: none; counter-reset: s; padding: 0; margin: 1rem 0; max-width: 48rem; }
+ol.steps li { counter-increment: s; position: relative; padding: 0.2rem 0 0.9rem 3rem; max-width: none; }
+ol.steps li::before { content: counter(s); position: absolute; left: 0; top: 0.1rem; width: 2rem; height: 2rem; border-radius: 50%; background: var(--ink); color: var(--paper); font-family: var(--head); font-weight: 700; display: flex; align-items: center; justify-content: center; }
+ol.steps li b { display: block; }
+
+/* Checklists */
+.checklists { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1rem; margin: 1rem 0; }
+.cl { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 1rem 1.1rem 0.6rem; }
+.cl-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; margin-bottom: 0.3rem; }
+.cl-head h3 { margin: 0; font-size: 1.1rem; }
+.count { font-size: 0.82rem; color: var(--ink-soft); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.check { display: flex; gap: 0.7rem; align-items: flex-start; padding: 0.5rem 0; border-top: 1px solid var(--rule); cursor: pointer; font-size: 0.96rem; }
+.check input { width: 1.15rem; height: 1.15rem; margin-top: 0.22rem; accent-color: var(--thesis); flex-shrink: 0; cursor: pointer; }
+.check input:checked + span { text-decoration: line-through; color: var(--ink-soft); }
+.clear { font: inherit; font-size: 0.9rem; font-weight: 600; background: transparent; color: var(--ink-soft); border: 1.5px solid var(--rule); border-radius: 8px; padding: 0.4rem 0.8rem; cursor: pointer; }
+.clear:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+footer { margin-top: 4rem; padding-top: 1.25rem; border-top: 1px solid var(--rule); font-size: 0.9rem; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>Your MSc, planned credit by credit</h1>
+  <p class="lede">Thirty-six credits: one mandatory course, seven electives and a 12-credit thesis at the end. This page shows which electives to take, the order their dependencies require, and four ways to schedule them depending on your course load and how the thesis is registered.</p>
+
+  <div class="ledger" role="img" aria-label="36 credits as twelve 3-credit blocks: CSE791 mandatory; CSE752, CSE717 and CSE756 foundations; CSE754, CSE751, CSE755 and CSE753 advanced AI; four blocks of thesis.">
+    <div class="cell mand-c"><b>CSE791</b><span>Research Methodology</span></div>
+    <div class="cell found-c"><b>CSE752</b><span>Deep Neural Networks</span></div>
+    <div class="cell found-c"><b>CSE717</b><span>Mathematical Programming</span></div>
+    <div class="cell found-c"><b>CSE756</b><span>Probabilistic Graphical Models</span></div>
+    <div class="cell adv-c"><b>CSE754</b><span>Deep Learning for Vision</span></div>
+    <div class="cell adv-c"><b>CSE751</b><span>Advanced NLP</span></div>
+    <div class="cell adv-c"><b>CSE755</b><span>Generative ML</span></div>
+    <div class="cell adv-c"><b>CSE753</b><span>Advanced RL</span></div>
+    <div class="cell thesis thesis-c"><b>CSE700 Thesis</b><span>12 credits, at the end</span></div>
+  </div>
+  <p class="ledger-cap">Each block is 3 credits. The thesis takes four blocks.</p>
+  <ul class="legend">
+    <li><span class="swatch found-c"></span>Foundation: math and deep learning core</li>
+    <li><span class="swatch adv-c"></span>Advanced AI</li>
+    <li><span class="swatch mand-c"></span>Mandatory course</li>
+    <li><span class="swatch thesis-c"></span>Thesis</li>
+  </ul>
+
+  <div class="callout rec">
+    <strong>The recommendation in brief</strong>
+    <p>Take <b>CSE752</b> and <b>CSE717</b> in semester 1. Put <b>CSE791</b> in the semester where thesis work begins. Choose <b>Plan C</b> if the thesis can be split into CSE700A and CSE700B, or <b>Plan B</b> if it must be one 12-credit block.</p>
+  </div>
+
+  <nav class="toc" aria-label="Contents">
+    <strong>On this page</strong>
+    <ul>
+      <li><a href="#rules">Ground rules</a></li>
+      <li><a href="#electives">The seven electives</a></li>
+      <li><a href="#skip">Courses to skip</a></li>
+      <li><a href="#deps">How the courses depend on each other</a></li>
+      <li><a href="#cse791">Where CSE791 goes</a></li>
+      <li><a href="#plans">The four plans</a></li>
+      <li><a href="#choose">Which plan to choose</a></li>
+      <li><a href="#direction">Choosing a thesis direction</a></li>
+      <li><a href="#late-thesis">Making a late thesis work</a></li>
+      <li><a href="#phd">Becoming a strong PhD candidate</a></li>
+      <li><a href="#checklists">Checklists</a></li>
+      <li><a href="#books">Self-study books</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- ============ RULES ============ -->
+<section id="rules">
+  <h2>Ground rules</h2>
+  <p>These constraints come from you and from the official program rules. Every plan below satisfies all of them.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Rule</th><th scope="col">What it means for you</th></tr></thead>
+      <tbody>
+        <tr><td>36 credits in total</td><td>CSE791 (3) + seven electives (21) + thesis (12).</td></tr>
+        <tr><td>Semester 1 is 6 credits</td><td>Two courses. The thesis can’t be taken in semester 1.</td></tr>
+        <tr><td>Later semesters: up to 12 credits</td><td>Up to four courses, or the thesis on its own. Plans use either 9 or 12 credits.</td></tr>
+        <tr><td>Every course except the thesis is 3 credits</td><td>Eight 3-credit courses remain: seven electives plus CSE791.</td></tr>
+        <tr><td>Thesis at the end</td><td>Registered as one 12-credit block, or as CSE700A + CSE700B (6 credits each).</td></tr>
+        <tr><td>CSE700B requires CSE791</td><td>CSE791 must be done before CSE700B, or before a single-block thesis.</td></tr>
+        <tr><td>Electives can’t be retaken for a better grade</td><td>Every grade is permanent, so choose courses that fit your strengths.</td></tr>
+        <tr><td>At most two electives from outside the Data Science list</td><td>CSE707 (Cybersecurity list) and CSE708 (not on the Data Science list) would use these slots.</td></tr>
+        <tr><td>Academic standing</td><td>Three F grades, or a CGPA below 2.50 at the end of semester 2 or later, ends enrollment.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout note">
+    <strong>Why every plan needs at least four semesters</strong>
+    <p>After your 6-credit first semester, 30 credits remain. At a maximum of 12 credits per semester, that takes at least three more semesters (12 + 12 + 6). The 12-credit plans therefore don’t finish sooner than the 9-credit ones; they only change where the load falls.</p>
+  </div>
+</section>
+
+<!-- ============ ELECTIVES ============ -->
+<section id="electives">
+  <h2>The seven electives</h2>
+  <p>Chosen for mathematical depth, low writing risk, relevance to current AI (LLMs, VLMs, generative models, RL and robotics) and long-term value for a PhD. Ratings are my reading of the official syllabi, not grading data.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Course</th><th scope="col">Role</th><th scope="col">Math depth</th><th scope="col">Grade risk</th><th scope="col">Why it’s in</th></tr></thead>
+      <tbody>
+        <tr><td><span class="code">CSE752</span><br>Deep Neural Networks</td><td><span class="chip found">Foundation</span></td><td><span class="dots" aria-label="4 of 5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></td><td><span class="chip good">Low</span></td><td>Unlocks four other electives. Transformers, training and optimization.</td></tr>
+        <tr><td><span class="code">CSE717</span><br>Mathematical Programming</td><td><span class="chip found">Foundation</span></td><td><span class="dots" aria-label="5 of 5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></td><td><span class="chip good">Low</span></td><td>Optimization behind all model training. Duality, QP and dynamic programming lead into RL.</td></tr>
+        <tr><td><span class="code">CSE756</span><br>Probabilistic Graphical Models</td><td><span class="chip found">Foundation</span></td><td><span class="dots" aria-label="5 of 5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></td><td><span class="chip good">Low</span></td><td>Probability and inference. Variational inference underlies VAEs and diffusion.</td></tr>
+        <tr><td><span class="code">CSE754</span><br>Deep Learning for Computer Vision</td><td><span class="chip adv">Advanced AI</span></td><td><span class="dots" aria-label="4 of 5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></td><td><span class="chip mid">Medium: project</span></td><td>The only course teaching VLMs directly: CLIP, BLIP, Flamingo, LLaVA. Also 3D vision and NeRF.</td></tr>
+        <tr><td><span class="code">CSE751</span><br>Advanced NLP</td><td><span class="chip adv">Advanced AI</span></td><td><span class="dots" aria-label="3 of 5"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></td><td><span class="chip bad">Medium–high: reading and writing</span></td><td>The only LLM-centred course. Transformers, LLMs, state space models.</td></tr>
+        <tr><td><span class="code">CSE755</span><br>Generative Machine Learning</td><td><span class="chip adv">Advanced AI</span></td><td><span class="dots" aria-label="5 of 5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></td><td><span class="chip good">Low–medium</span></td><td>Diffusion, score-based models, flows. The most mathematical modern-AI course.</td></tr>
+        <tr><td><span class="code">CSE753</span><br>Advanced Reinforcement Learning</td><td><span class="chip adv">Advanced AI</span></td><td><span class="dots" aria-label="4 of 5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></td><td><span class="chip good">Low</span></td><td>Robotics and LLM post-training. PPO, world models, imitation learning.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The reasoning behind each course</h3>
+  <details class="why"><summary>CSE752 Deep Neural Networks</summary><div class="body">
+    <p>Covers backpropagation, MLPs, CNNs, RNNs, autoencoders, VAEs and GANs, transformers (BERT and GPT), optimizers including SGD, Adam and learning-rate schedules, dropout and batch normalization, ResNets and transfer learning.</p>
+    <p>It is the base for CSE751, CSE754, CSE755 and CSE753, and nearly every AI paper assumes this material. Assessment is likely implementation and derivation, and ethics is only one line in the objectives. That makes it the first course to take.</p>
+  </div></details>
+  <details class="why"><summary>CSE717 Mathematical Programming</summary><div class="body">
+    <p>Constrained optimization and Lagrange multipliers, linear programming and the Simplex method, duality and complementary slackness, interior-point methods, integer, quadratic and nonlinear programming, and dynamic programming.</p>
+    <p>Duality appears in SVMs, constrained RL and LLM alignment objectives. Quadratic programming sits inside model-predictive control, which CSE753 covers. Dynamic programming leads directly to the Bellman equations in RL. It’s pure problem-solving, your strongest area.</p>
+    <p><b>Gap to fill:</b> there is no convex analysis or theory of why SGD converges. Read chapters 2–5 of Boyd and Vandenberghe’s <i>Convex Optimization</i> alongside it.</p>
+  </div></details>
+  <details class="why"><summary>CSE756 Probabilistic Graphical Models</summary><div class="body">
+    <p>Bayesian networks, Markov random fields, d-separation, variable elimination, belief propagation, junction trees, MCMC and Gibbs sampling, HMMs, Kalman filters, CRFs, variational inference, neural ODEs and graph neural networks.</p>
+    <p>Variational inference is the mathematics behind VAEs and diffusion models, so this course makes CSE755 much easier. Kalman filters are standard for robot state estimation, and the GNN content gives you some of the graph-based thinking you wanted.</p>
+  </div></details>
+  <details class="why"><summary>CSE754 Deep Learning for Computer Vision</summary><div class="body">
+    <p>CNN architectures, detection and segmentation, Vision Transformers, multimodal models (CLIP, BLIP, Flamingo, LLaVA), image generation, 3D vision and NeRF, video transformers, self-supervised learning, and a project.</p>
+    <p>This is the only course that teaches VLMs directly, and it is the perception half of robotics. The project is implementation work rather than essays. Design it as a test drive for a possible thesis topic.</p>
+  </div></details>
+  <details class="why"><summary>CSE751 Advanced Natural Language Processing</summary><div class="body">
+    <p>Embeddings, parsing, sequence models and the Viterbi algorithm, RNNs, attention, transformers (byte-pair encoding, positional encoding, query-key-value), BERT, LLMs, state space models, and generative and ethical NLP.</p>
+    <p>It is the only course centred on LLMs, the dominant technology in AI today, and VLMs are half language model.</p>
+    <p><b>Watch out:</b> one official objective is academic reading and writing, and the syllabus ends with ethics. Ask seniors how much of the grade comes from paper reviews and reports. If it’s a lot, swap in CSE708.</p>
+    <p><b>Not covered:</b> LoRA fine-tuning, instruction tuning, RLHF and DPO, and retrieval-augmented generation. Learn these from papers.</p>
+  </div></details>
+  <details class="why"><summary>CSE755 Generative Machine Learning</summary><div class="body">
+    <p>Latent variable models, autoregressive models, VAEs, GANs, diffusion and score-based models, energy-based models, normalizing flows, and transformer-based and multimodal generation.</p>
+    <p>The most mathematical of the modern-AI courses. Diffusion models power image and video generation and are increasingly used as robot control policies. It builds directly on CSE756.</p>
+  </div></details>
+  <details class="why"><summary>CSE753 Advanced Reinforcement Learning</summary><div class="body">
+    <p>MDPs, DQN variants, policy gradients and actor-critic, PPO and TRPO, model-based RL with world models and MPC, multi-agent and hierarchical RL, inverse RL, safe RL and imitation learning.</p>
+    <p>Central to robotics. The same policy-optimization ideas are used to align LLMs and train reasoning models. The mathematics (Bellman equations, the policy gradient theorem) suits you.</p>
+  </div></details>
+
+  <div class="callout tip">
+    <strong>Reserve: CSE708 Graph Theory</strong>
+    <p>Eulerian and Hamiltonian graphs, trees and counting, planarity, colouring, digraphs, Markov chains, matching, Hall’s and Menger’s theorems, and matroids. It’s pure, timeless discrete mathematics. <b>Swap it in for CSE751</b> if CSE751 turns out to be writing-heavy. It uses one of your two outside slots, so confirm approval first, and remember that proof-based exams can be demanding too.</p>
+  </div>
+</section>
+
+<!-- ============ SKIP ============ -->
+<section id="skip">
+  <h2>Courses to skip</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Course</th><th scope="col">Main reason to skip</th><th scope="col">Covered instead by</th></tr></thead>
+      <tbody>
+        <tr><td><span class="code">CSE710</span> Advanced AI</td><td>A survey: one or two weeks per topic. The rest (genetic algorithms, semantic nets, TOPSIS) is older or niche.</td><td>756, 753, 755</td></tr>
+        <tr><td><span class="code">CSE711</span> Advanced ML</td><td>Conventional ML (trees, boosting, SVMs, clustering), not theory. Likely review for a Data Science student.</td><td>752, self-study</td></tr>
+        <tr><td><span class="code">CSE713</span> Syntactic Pattern Recognition</td><td>Formal grammars for pattern recognition. Niche, largely superseded, with research-reading objectives.</td><td>None needed</td></tr>
+        <tr><td><span class="code">CSE715</span> Neural Networks and Fuzzy</td><td>Historical network theory plus fuzzy systems. Its modern half duplicates CSE752.</td><td>752, 755</td></tr>
+        <tr><td><span class="code">CSE758</span> Data Mining</td><td>Classic data mining that overlaps CSE711 and your undergraduate work.</td><td>Background</td></tr>
+        <tr><td><span class="code">CSE761</span> Big Data Analytics</td><td>Framework-focused and light on math. Tools date quickly.</td><td>Thesis practice</td></tr>
+        <tr><td><span class="code">CSE762</span> Fairness, Ethics, Explainability</td><td>Philosophy, law, governance and case studies. The most essay-heavy course on the list.</td><td>Ethics sections in 751, 753, 754, 755</td></tr>
+        <tr><td><span class="code">CSE763</span> Advanced Bioinformatics</td><td>Needs biology background and heavy domain memorization.</td><td>None needed</td></tr>
+        <tr><td><span class="code">CSE707</span> Distributed Computing</td><td>Officially on the Cybersecurity list. Uses an outside slot.</td><td>Thesis practice</td></tr>
+        <tr><td><span class="code">CSE757</span> ML Systems Design</td><td>MLOps and model serving. Engineering rather than math, better suited to industry careers.</td><td>None needed</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout note">
+    <strong>If your conventional ML feels weak</strong>
+    <p>Close the gap with self-study before semester 1. It is the easiest material on the list to learn on your own. If you still want CSE711, it should replace CSE751.</p>
+  </div>
+</section>
+
+<!-- ============ DEPENDENCIES ============ -->
+<section id="deps">
+  <h2>How the courses depend on each other</h2>
+  <p>Only one arrow is an official prerequisite. The others are the order in which the material builds, and ignoring them makes the later courses harder.</p>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  S752["CSE752 Deep Neural Networks"]
+  S717["CSE717 Mathematical Programming"]
+  S756["CSE756 Probabilistic Graphical Models"]
+  S754["CSE754 DL for Computer Vision"]
+  S751["CSE751 Advanced NLP"]
+  S755["CSE755 Generative ML"]
+  S753["CSE753 Advanced RL"]
+  S791["CSE791 Research Methodology"]
+  T["CSE700 Thesis, or CSE700B"]
+  S752 -.-> S754
+  S752 -.-> S751
+  S752 -.-> S755
+  S752 -.-> S753
+  S756 -.-> S755
+  S717 -.-> S753
+  S791 ==>|official prerequisite| T
+  classDef found fill:#E2E9FC,stroke:#2F5BD3,color:#15213B,stroke-width:1.5px
+  classDef adv fill:#EDE6FA,stroke:#6B44C2,color:#15213B,stroke-width:1.5px
+  classDef mand fill:#FAEFD9,stroke:#B4741A,color:#15213B,stroke-width:1.5px
+  classDef thesis fill:#DCF2EA,stroke:#0D8669,color:#15213B,stroke-width:1.5px
+  class S752,S717,S756 found
+  class S754,S751,S755,S753 adv
+  class S791 mand
+  class T thesis
+</pre>
+  </div>
+  <p class="diagram-key">Dotted arrows: recommended order. Thick arrow: official prerequisite.</p>
+
+  <h3>What the diagram forces</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Decision</th><th scope="col">Reason</th></tr></thead>
+      <tbody>
+        <tr><td><b>CSE752 in semester 1</b></td><td>It feeds four electives, more than any other course.</td></tr>
+        <tr><td><b>CSE717 in semester 1</b></td><td>It feeds CSE753, which Plans B and C place in semester 2. It’s also pure math, a good way to start with strong grades.</td></tr>
+        <tr><td><b>CSE756 can wait for semester 2</b></td><td>It only feeds CSE755, which every plan places in semester 3.</td></tr>
+        <tr><td><b>CSE755 in semester 3 in every plan</b></td><td>It needs both CSE752 and CSE756.</td></tr>
+        <tr><td><b>CSE791 before or with the thesis start</b></td><td>CSE700B officially requires it.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ CSE791 ============ -->
+<section id="cse791">
+  <h2>Where CSE791 goes</h2>
+  <div class="callout rec">
+    <strong>Your instinct is right</strong>
+    <p>Take CSE791 in the semester right before the thesis. One refinement: if the thesis is split, take CSE791 <b>alongside CSE700A</b>, since only CSE700B requires it. Either way, you write the proposal at the moment you actually need it.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Factor</th><th scope="col">CSE791 in semester 1</th><th scope="col">CSE791 right before or with the thesis</th></tr></thead>
+      <tbody>
+        <tr><td>Thesis topic</td><td><span class="chip bad">Not chosen yet</span> The proposal would be hypothetical.</td><td><span class="chip good">Informed</span> You’ll have taken five or six electives.</td></tr>
+        <tr><td>Proposal reuse</td><td><span class="chip bad">Likely rewritten later</span></td><td><span class="chip good">Becomes your real thesis proposal</span></td></tr>
+        <tr><td>Supervisor</td><td><span class="chip mid">Too early to commit</span></td><td><span class="chip good">Natural time to confirm one</span></td></tr>
+        <tr><td>Semester 1 slots</td><td><span class="chip bad">Uses one of only two</span></td><td><span class="chip good">Frees semester 1 for CSE752 and CSE717</span></td></tr>
+        <tr><td>Attention for a writing course</td><td><span class="chip good">High</span> Light semester.</td><td><span class="chip good">Good</span> It shares a 6–12 credit semester with mostly math courses.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout warn">
+    <strong>Don’t wait for CSE791 to find a supervisor</strong>
+    <p>Start conversations with potential supervisors one semester earlier. Then the proposal you write in CSE791 is one they have already agreed to, and no time is lost.</p>
+  </div>
+</section>
+
+<!-- ============ PLANS ============ -->
+<section id="plans">
+  <h2>The four plans</h2>
+  <p>Two choices produce four plans: how many credits you take per semester after semester 1, and whether the thesis is one block or split. Select a plan to see its timeline.</p>
+
+  <div class="matrix" role="group" aria-label="Plan matrix">
+    <div class="hd corner"></div>
+    <div class="hd">Thesis as one 12-credit block</div>
+    <div class="hd">Thesis split: 700A + 700B</div>
+    <div class="rowhd">9 credits per semester</div>
+    <button class="mcell" type="button" data-open="a"><b>Plan A</b><span>6 / 9 / 9 / 12</span><span>4 semesters</span></button>
+    <button class="mcell" type="button" data-open="d"><b>Plan D</b><span>6 / 9 / 6 / 9 / 6</span><span>5 semesters</span></button>
+    <div class="rowhd">12 credits per semester</div>
+    <button class="mcell" type="button" data-open="b"><b>Plan B</b><span>6 / 12 / 6 / 12</span><span>4 semesters</span></button>
+    <button class="mcell pick" type="button" data-open="c"><b>Plan C</b><span>6 / 12 / 12 / 6</span><span>4 semesters, recommended</span></button>
+  </div>
+
+  <div class="callout note">
+    <strong>Why Plan D needs a fifth semester</strong>
+    <p>At 9 credits per semester, the 30 credits left after semester 1 can’t fit into three semesters (9 + 9 + 9 = 27). Plan A avoids this only because its thesis semester is allowed to be 12 credits.</p>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Plans">
+    <button class="tab" role="tab" id="tab-a" aria-controls="panel-a" aria-selected="false" tabindex="-1">Plan A<small>9 credits, one block</small></button>
+    <button class="tab" role="tab" id="tab-b" aria-controls="panel-b" aria-selected="false" tabindex="-1">Plan B<small>12 credits, one block</small></button>
+    <button class="tab" role="tab" id="tab-c" aria-controls="panel-c" aria-selected="true" tabindex="0">Plan C<small>12 credits, split</small></button>
+    <button class="tab" role="tab" id="tab-d" aria-controls="panel-d" aria-selected="false" tabindex="-1">Plan D<small>9 credits, split</small></button>
+  </div>
+
+  <!-- Plan A -->
+  <div class="panel" role="tabpanel" id="panel-a" aria-labelledby="tab-a" hidden>
+    <h3>Plan A: 9 credits per semester, thesis as one block</h3>
+    <div class="timeline">
+      <div class="sem"><div class="sem-label"><b>Semester 1</b><span>6 credits</span></div><div class="track">
+        <div class="blk found-c"><b>CSE752</b><span>Deep Neural Networks</span></div>
+        <div class="blk found-c"><b>CSE717</b><span>Mathematical Programming</span></div>
+        <div class="blk empty">unused</div><div class="blk empty">unused</div></div></div>
+      <div class="sem"><div class="sem-label"><b>Semester 2</b><span>9 credits</span></div><div class="track">
+        <div class="blk found-c"><b>CSE756</b><span>Probabilistic Graphical Models</span></div>
+        <div class="blk adv-c"><b>CSE754</b><span>DL for Computer Vision</span></div>
+        <div class="blk adv-c"><b>CSE751</b><span>Advanced NLP</span></div>
+        <div class="blk empty">unused</div></div></div>
+      <div class="sem"><div class="sem-label"><b>Semester 3</b><span>9 credits</span></div><div class="track">
+        <div class="blk mand-c"><b>CSE791</b><span>Research Methodology</span></div>
+        <div class="blk adv-c"><b>CSE753</b><span>Advanced RL</span></div>
+        <div class="blk adv-c"><b>CSE755</b><span>Generative ML</span></div>
+        <div class="blk empty">unused</div></div></div>
+      <div class="sem"><div class="sem-label"><b>Semester 4</b><span>12 credits</span></div><div class="track">
+        <div class="blk s4 thesis-c"><b>CSE700 Thesis</b><span>12 credits, full semester</span></div></div></div>
+    </div>
+    <h4>Why this order</h4>
+    <ul class="why-list">
+      <li><b>Semester 2</b> holds three courses that need only CSE752. CSE754 and CSE751 together give you both halves of a vision-language model.</li>
+      <li><b>CSE751 and CSE791 are kept apart,</b> so your two writing-heavy courses never share a semester.</li>
+      <li><b>Semester 3:</b> CSE753 needs CSE717 and CSE752, CSE755 needs CSE756, and CSE791 produces your thesis proposal right before the thesis.</li>
+    </ul>
+    <div class="pc">
+      <div class="pros"><h4>Strengths</h4><ul><li>Never more than three courses at once.</li><li>Best CGPA protection among the four-semester plans.</li><li>The final semester is entirely thesis.</li></ul></div>
+      <div class="cons"><h4>Weaknesses</h4><ul><li>The thesis gets one semester of registered time, about 14 class weeks.</li><li>You first meet RL in the same semester you choose your topic.</li></ul></div>
+    </div>
+    <p class="bestfor"><b>Best for:</b> lowest risk to your CGPA when you must finish in four semesters.</p>
+    <p class="small muted"><b>Variant:</b> if you lean toward robotics, swap CSE751 and CSE753. The cost is that CSE751 and CSE791 then share semester 3.</p>
+  </div>
+
+  <!-- Plan B -->
+  <div class="panel" role="tabpanel" id="panel-b" aria-labelledby="tab-b" hidden>
+    <h3>Plan B: 12 credits per semester, thesis as one block</h3>
+    <div class="timeline">
+      <div class="sem"><div class="sem-label"><b>Semester 1</b><span>6 credits</span></div><div class="track">
+        <div class="blk found-c"><b>CSE752</b><span>Deep Neural Networks</span></div>
+        <div class="blk found-c"><b>CSE717</b><span>Mathematical Programming</span></div>
+        <div class="blk empty">unused</div><div class="blk empty">unused</div></div></div>
+      <div class="sem"><div class="sem-label"><b>Semester 2</b><span>12 credits</span></div><div class="track">
+        <div class="blk found-c"><b>CSE756</b><span>Probabilistic Graphical Models</span></div>
+        <div class="blk adv-c"><b>CSE754</b><span>DL for Computer Vision</span></div>
+        <div class="blk adv-c"><b>CSE751</b><span>Advanced NLP</span></div>
+        <div class="blk adv-c"><b>CSE753</b><span>Advanced RL</span></div></div></div>
+      <div class="sem"><div class="sem-label"><b>Semester 3</b><span>6 credits</span></div><div class="track">
+        <div class="blk mand-c"><b>CSE791</b><span>Research Methodology</span></div>
+        <div class="blk adv-c"><b>CSE755</b><span>Generative ML</span></div>
+        <div class="blk s2 empty">thesis preparation time</div></div></div>
+      <div class="sem"><div class="sem-label"><b>Semester 4</b><span>12 credits</span></div><div class="track">
+        <div class="blk s4 thesis-c"><b>CSE700 Thesis</b><span>12 credits, full semester</span></div></div></div>
+    </div>
+    <h4>Why this order</h4>
+    <ul class="why-list">
+      <li><b>Semester 2 front-loads four courses.</b> CSE753 can join because CSE717 and CSE752 are already done.</li>
+      <li><b>Semester 3 is deliberately light.</b> While writing the CSE791 proposal, you have time for a literature review, supervisor meetings and pilot experiments.</li>
+    </ul>
+    <div class="pc">
+      <div class="pros"><h4>Strengths</h4><ul><li>You see every research direction (vision, language, RL) before choosing a topic.</li><li>The light semester 3 works as a thesis preparation semester.</li></ul></div>
+      <div class="cons"><h4>Weaknesses</h4><ul><li>Semester 2 is the heaviest in any plan: four advanced courses, including a project (CSE754) and a reading and writing component (CSE751).</li><li>The thesis still gets only one registered semester.</li></ul></div>
+    </div>
+    <p class="bestfor"><b>Best for:</b> a thesis that must be one block, if you’re comfortable with four courses in semester 2.</p>
+  </div>
+
+  <!-- Plan C -->
+  <div class="panel" role="tabpanel" id="panel-c" aria-labelledby="tab-c">
+    <h3>Plan C: 12 credits per semester, thesis split</h3>
+    <div class="timeline">
+      <div class="sem"><div class="sem-label"><b>Semester 1</b><span>6 credits</span></div><div class="track">
+        <div class="blk found-c"><b>CSE752</b><span>Deep Neural Networks</span></div>
+        <div class="blk found-c"><b>CSE717</b><span>Mathematical Programming</span></div>
+        <div class="blk empty">unused</div><div class="blk empty">unused</div></div></div>
+      <div class="sem"><div class="sem-label"><b>Semester 2</b><span>12 credits</span></div><div class="track">
+        <div class="blk found-c"><b>CSE756</b><span>Probabilistic Graphical Models</span></div>
+        <div class="blk adv-c"><b>CSE754</b><span>DL for Computer Vision</span></div>
+        <div class="blk adv-c"><b>CSE751</b><span>Advanced NLP</span></div>
+        <div class="blk adv-c"><b>CSE753</b><span>Advanced RL</span></div></div></div>
+      <div class="sem"><div class="sem-label"><b>Semester 3</b><span>12 credits</span></div><div class="track">
+        <div class="blk mand-c"><b>CSE791</b><span>Research Methodology</span></div>
+        <div class="blk adv-c"><b>CSE755</b><span>Generative ML</span></div>
+        <div class="blk s2 thesis-c"><b>CSE700A Thesis</b><span>6 credits: proposal and first experiments</span></div></div></div>
+      <div class="sem"><div class="sem-label"><b>Semester 4</b><span>6 credits</span></div><div class="track">
+        <div class="blk s2 thesis-c"><b>CSE700B Thesis</b><span>6 credits: results, writing, defense</span></div>
+        <div class="blk s2 empty">room for paper submission and PhD applications</div></div></div>
+    </div>
+    <h4>Why this order</h4>
+    <ul class="why-list">
+      <li><b>Semester 2 matches Plan B,</b> so every course CSE755 and the thesis depend on is done by the end of it.</li>
+      <li><b>CSE791 runs alongside CSE700A.</b> The proposal you write for CSE791 is your actual thesis proposal, and you start acting on it immediately.</li>
+      <li><b>CSE700B stands alone</b> in the final semester, which leaves room to finish a paper.</li>
+    </ul>
+    <div class="pc">
+      <div class="pros"><h4>Strengths</h4><ul><li>The only four-semester plan that gives the thesis two semesters, which matters most for publications.</li><li>A light final semester for paper submission and PhD applications.</li><li>Method learned in CSE791 is applied straight away.</li></ul></div>
+      <div class="cons"><h4>Weaknesses</h4><ul><li>Semesters 2 and 3 are both full at 12 credits.</li><li>Semester 3 combines a writing course, heavy math (CSE755) and the thesis start.</li></ul></div>
+    </div>
+    <p class="bestfor"><b>Best for:</b> the strongest PhD profile in four semesters, if the thesis can be split.</p>
+    <p class="small muted"><b>Variant:</b> if the department requires CSE791 to be finished before CSE700A, move CSE791 into semester 2 and CSE753 into semester 3. The cost is that CSE751 and CSE791 share semester 2.</p>
+  </div>
+
+  <!-- Plan D -->
+  <div class="panel" role="tabpanel" id="panel-d" aria-labelledby="tab-d" hidden>
+    <h3>Plan D: 9 credits per semester, thesis split</h3>
+    <div class="timeline">
+      <div class="sem"><div class="sem-label"><b>Semester 1</b><span>6 credits</span></div><div class="track">
+        <div class="blk found-c"><b>CSE752</b><span>Deep Neural Networks</span></div>
+        <div class="blk found-c"><b>CSE717</b><span>Mathematical Programming</span></div>
+        <div class="blk empty">unused</div><div class="blk empty">unused</div></div></div>
+      <div class="sem"><div class="sem-label"><b>Semester 2</b><span>9 credits</span></div><div class="track">
+        <div class="blk found-c"><b>CSE756</b><span>Probabilistic Graphical Models</span></div>
+        <div class="blk adv-c"><b>CSE754</b><span>DL for Computer Vision</span></div>
+        <div class="blk adv-c"><b>CSE751</b><span>Advanced NLP</span></div>
+        <div class="blk empty">unused</div></div></div>
+      <div class="sem"><div class="sem-label"><b>Semester 3</b><span>6 credits</span></div><div class="track">
+        <div class="blk adv-c"><b>CSE753</b><span>Advanced RL</span></div>
+        <div class="blk adv-c"><b>CSE755</b><span>Generative ML</span></div>
+        <div class="blk empty">unused</div><div class="blk empty">unused</div></div></div>
+      <div class="sem"><div class="sem-label"><b>Semester 4</b><span>9 credits</span></div><div class="track">
+        <div class="blk mand-c"><b>CSE791</b><span>Research Methodology</span></div>
+        <div class="blk s2 thesis-c"><b>CSE700A Thesis</b><span>6 credits</span></div>
+        <div class="blk empty">unused</div></div></div>
+      <div class="sem"><div class="sem-label"><b>Semester 5</b><span>6 credits</span></div><div class="track">
+        <div class="blk s2 thesis-c"><b>CSE700B Thesis</b><span>6 credits</span></div>
+        <div class="blk s2 empty">room for paper submission and PhD applications</div></div></div>
+    </div>
+    <h4>Why this order</h4>
+    <ul class="why-list">
+      <li><b>All seven electives finish by semester 3,</b> so the last two semesters are almost entirely research.</li>
+      <li><b>CSE791 pairs with CSE700A,</b> just as in Plan C.</li>
+    </ul>
+    <div class="pc">
+      <div class="pros"><h4>Strengths</h4><ul><li>The lightest load of any plan.</li><li>Two semesters of thesis research.</li><li>Never more than three courses at once.</li></ul></div>
+      <div class="cons"><h4>Weaknesses</h4><ul><li>One extra semester of time and fees.</li><li>Semester 3 is underused at 6 credits.</li></ul></div>
+    </div>
+    <p class="bestfor"><b>Best for:</b> maximum CGPA protection when time and cost aren’t constraints.</p>
+    <p class="small muted"><b>Variant:</b> to take CSE791 before the thesis starts, move it into semester 3 (making it 9 credits) and take CSE700A alone in semester 4.</p>
+  </div>
+
+  <h3>The four plans side by side</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col"></th><th scope="col">Plan A</th><th scope="col">Plan B</th><th scope="col">Plan C</th><th scope="col">Plan D</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Semesters</th><td class="num">4</td><td class="num">4</td><td class="num">4</td><td class="num">5</td></tr>
+        <tr><th scope="row">Credit pattern</th><td class="num">6 / 9 / 9 / 12</td><td class="num">6 / 12 / 6 / 12</td><td class="num">6 / 12 / 12 / 6</td><td class="num">6 / 9 / 6 / 9 / 6</td></tr>
+        <tr><th scope="row">Most courses in one semester</th><td><span class="chip good">3</span></td><td><span class="chip bad">4</span></td><td><span class="chip bad">4</span></td><td><span class="chip good">3</span></td></tr>
+        <tr><th scope="row">Thesis research time</th><td><span class="chip bad">1 semester</span></td><td><span class="chip mid">1 semester + prep</span></td><td><span class="chip good">2 semesters</span></td><td><span class="chip good">2 semesters</span></td></tr>
+        <tr><th scope="row">Final semester</th><td>Thesis, 12 credits</td><td>Thesis, 12 credits</td><td>CSE700B, 6 credits</td><td>CSE700B, 6 credits</td></tr>
+        <tr><th scope="row">CGPA safety</th><td><span class="chip good">High</span></td><td><span class="chip mid">Medium</span></td><td><span class="chip mid">Medium</span></td><td><span class="chip good">Highest</span></td></tr>
+        <tr><th scope="row">Value for a PhD application</th><td><span class="chip bad">Lower</span></td><td><span class="chip mid">Medium</span></td><td><span class="chip good">High</span></td><td><span class="chip good">High</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ CHOOSE ============ -->
+<section id="choose">
+  <h2>Which plan to choose</h2>
+  <p>Answer three questions in order.</p>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart TD
+  Q1{"Can the thesis be split into 700A and 700B?"}
+  Q2{"Comfortable with 4 courses in semester 2?"}
+  Q3{"Is a 5th semester acceptable?"}
+  Q4{"Comfortable with 4 courses in semester 2?"}
+  PA["Plan A: 9 credits, one block"]
+  PB["Plan B: 12 credits, one block"]
+  PC["Plan C: 12 credits, split"]
+  PD["Plan D: 9 credits, split"]
+  Q1 -->|Yes| Q2
+  Q1 -->|No, one block only| Q4
+  Q2 -->|Yes| PC
+  Q2 -->|No| Q3
+  Q3 -->|Yes| PD
+  Q3 -->|No| PA
+  Q4 -->|Yes| PB
+  Q4 -->|No| PA
+  classDef plan fill:#DCF2EA,stroke:#0D8669,color:#15213B,stroke-width:1.5px
+  classDef q fill:#E2E9FC,stroke:#2F5BD3,color:#15213B,stroke-width:1.5px
+  class PA,PB,PC,PD plan
+  class Q1,Q2,Q3,Q4 q
+</pre>
+  </div>
+  <div class="callout rec">
+    <strong>My recommendation: Plan C, with Plan B as the fallback</strong>
+    <p>Research output is what PhD committees weigh most, and Plan C is the only four-semester plan that gives the thesis two semesters. If the thesis must be one block, Plan B is the next best, because its light semester 3 works as a preparation semester.</p>
+    <p>Semester 2 in both is four courses, but three of them are mathematical, which is where you’re strongest. If that still feels like too much risk to your CGPA, choose Plan D when an extra semester is affordable, or Plan A when it isn’t.</p>
+  </div>
+</section>
+
+<!-- ============ DIRECTION ============ -->
+<section id="direction">
+  <h2>Choosing a thesis direction</h2>
+  <p>You don’t need to decide now. Decide during your CSE791 semester. By then every plan will have shown you deep learning, vision-language models and language models. Plans B and C also cover RL first; Plans A and D bring it in alongside or just before CSE791.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Direction</th><th scope="col">Courses that show it</th><th scope="col">Example thesis question</th><th scope="col">Compute need</th></tr></thead>
+      <tbody>
+        <tr><td><span class="chip adv">VLMs and multimodal</span></td><td>CSE754, CSE751</td><td>Can uncertainty estimates detect object hallucination in small open-source VLMs?</td><td><span class="chip good">Low–medium</span></td></tr>
+        <tr><td><span class="chip adv">Robotics and RL</span></td><td>CSE753, CSE754</td><td>Does VLM-based visual grounding help a simulated robot policy generalize to unseen objects?</td><td><span class="chip mid">Medium</span></td></tr>
+        <tr><td><span class="chip adv">LLMs</span></td><td>CSE751, CSE752</td><td>Can RL-based fine-tuning improve reasoning in small language models on limited compute?</td><td><span class="chip mid">Medium</span></td></tr>
+        <tr><td><span class="chip adv">Generative and probabilistic</span></td><td>CSE755, CSE756</td><td>Can diffusion-based policies make imitation learning more sample-efficient?</td><td><span class="chip mid">Medium</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout tip">
+    <strong>Use course projects as test drives</strong>
+    <p>A project in CSE754 or CSE753 that resembles a possible thesis tells you whether you enjoy the area, gives you pilot results, and shows a potential supervisor what you can do.</p>
+  </div>
+  <div class="callout note">
+    <strong>Choose the supervisor before the topic</strong>
+    <p>An actively publishing supervisor whose interests overlap with yours matters more than the exact research question. Their letter will also be the most important one in your PhD application.</p>
+  </div>
+</section>
+
+<!-- ============ LATE THESIS ============ -->
+<section id="late-thesis">
+  <h2>Making a late thesis work</h2>
+  <div class="callout warn">
+    <strong>The risk of a one-semester thesis</strong>
+    <p>In Plans A and B, the thesis gets one registered semester, about 14 class weeks. That is short for publishable research. You can keep the thesis at the end and still protect its quality by doing the groundwork earlier, informally.</p>
+  </div>
+  <ol class="steps">
+    <li><b>Semester 2: find people</b>Shortlist two or three potential supervisors and read their recent papers.</li>
+    <li><b>Semester 2: test an area</b>Shape a course project, ideally in CSE754 or CSE753, around a possible thesis topic.</li>
+    <li><b>Semester before the thesis: agree the topic</b>Confirm the supervisor and topic, and write the proposal in CSE791.</li>
+    <li><b>Semester before the thesis: get a running start</b>Reproduce one baseline paper and set up compute (department GPUs, Kaggle or Colab).</li>
+    <li><b>Thesis semester: execute</b>Run the main experiments in roughly the first eight weeks and write in the last six.</li>
+  </ol>
+</section>
+
+<!-- ============ PHD ============ -->
+<section id="phd">
+  <h2>Becoming a strong PhD candidate</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">What committees look at</th><th scope="col">How this plan builds it</th></tr></thead>
+      <tbody>
+        <tr><td><b>Research output</b><br><span class="chip good">Most important</span></td><td>A paper submitted or a preprint on arXiv by application time. Workshop papers at NeurIPS, ICML, ICLR, CVPR, CoRL or ACL are realistic targets for MSc work.</td></tr>
+        <tr><td><b>Recommendation letters</b></td><td>Usually three: your supervisor, plus two instructors from advanced courses. Strong projects in CSE754, CSE755 or CSE753 earn those letters.</td></tr>
+        <tr><td><b>Transcript</b></td><td>A high CGPA plus visible rigour: optimization, graphical models, generative models and RL.</td></tr>
+        <tr><td><b>Statement of purpose</b></td><td>One coherent story, for example making multimodal models reliable enough for embodied agents.</td></tr>
+        <tr><td><b>Code and portfolio</b></td><td>Clean, public thesis code on GitHub with reproducible results, and a simple personal page.</td></tr>
+        <tr><td><b>English test</b></td><td>IELTS or TOEFL for most programs abroad. Many US computer science programs have made the GRE optional, but check each one.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout note">
+    <strong>Check where deadlines fall in your plan</strong>
+    <p>Many US PhD deadlines fall in early to mid December for entry the following autumn. Contact potential advisors two to three months before, and request letters four to six weeks before the first deadline. If your paper won’t be ready in time, a research-assistant year after the MSc is common and well regarded.</p>
+  </div>
+</section>
+
+<!-- ============ CHECKLISTS ============ -->
+<section id="checklists">
+  <h2>Checklists</h2>
+  <p>Your ticks are saved in this browser.</p>
+  <div class="checklists">
+    <div class="cl" data-group>
+      <div class="cl-head"><h3>Ask the department</h3><span class="count"></span></div>
+      <label class="check"><input type="checkbox" id="d1"><span>Can the thesis be split into CSE700A and CSE700B, and can CSE700A run alongside courses?</span></label>
+      <label class="check"><input type="checkbox" id="d2"><span>Must CSE791 be finished before CSE700A, or only before CSE700B?</span></label>
+      <label class="check"><input type="checkbox" id="d3"><span>Which electives are offered in each semester? (Every plan needs CSE752 and CSE717 in semester 1.)</span></label>
+      <label class="check"><input type="checkbox" id="d4"><span>Is the thesis letter-graded, and does it count toward CGPA?</span></label>
+      <label class="check"><input type="checkbox" id="d5"><span>Is CSE708 approved as an outside-specialization course, in case you need the reserve?</span></label>
+      <label class="check"><input type="checkbox" id="d6"><span>How does the rule excluding up to two C grades appear on the transcript?</span></label>
+    </div>
+    <div class="cl" data-group>
+      <div class="cl-head"><h3>Ask seniors</h3><span class="count"></span></div>
+      <label class="check"><input type="checkbox" id="s1"><span>What share of CSE751’s grade comes from paper reviews, reports and presentations?</span></label>
+      <label class="check"><input type="checkbox" id="s2"><span>How heavy is the CSE754 project?</span></label>
+      <label class="check"><input type="checkbox" id="s3"><span>Who teaches each course this year, and how do they grade?</span></label>
+      <label class="check"><input type="checkbox" id="s4"><span>How demanding are the CSE717 and CSE756 exams?</span></label>
+    </div>
+    <div class="cl" data-group>
+      <div class="cl-head"><h3>Thesis groundwork</h3><span class="count"></span></div>
+      <label class="check"><input type="checkbox" id="t1"><span>Shortlist two or three potential supervisors.</span></label>
+      <label class="check"><input type="checkbox" id="t2"><span>Read 10–15 recent papers in two candidate directions.</span></label>
+      <label class="check"><input type="checkbox" id="t3"><span>Use one course project as a thesis test drive.</span></label>
+      <label class="check"><input type="checkbox" id="t4"><span>Agree a topic with a supervisor by the end of the CSE791 semester.</span></label>
+      <label class="check"><input type="checkbox" id="t5"><span>Reproduce one baseline paper before the thesis starts.</span></label>
+      <label class="check"><input type="checkbox" id="t6"><span>Set up compute: department GPUs, Kaggle or Colab.</span></label>
+    </div>
+    <div class="cl" data-group>
+      <div class="cl-head"><h3>PhD applications</h3><span class="count"></span></div>
+      <label class="check"><input type="checkbox" id="p1"><span>Pick target programs and potential advisors.</span></label>
+      <label class="check"><input type="checkbox" id="p2"><span>Take IELTS or TOEFL.</span></label>
+      <label class="check"><input type="checkbox" id="p3"><span>Submit a paper or post a preprint.</span></label>
+      <label class="check"><input type="checkbox" id="p4"><span>Request letters four to six weeks before the first deadline.</span></label>
+      <label class="check"><input type="checkbox" id="p5"><span>Draft the statement of purpose around one research story.</span></label>
+      <label class="check"><input type="checkbox" id="p6"><span>Clean up GitHub and a personal page.</span></label>
+    </div>
+  </div>
+  <button class="clear" type="button" id="clear-checks">Clear all ticks</button>
+</section>
+
+<!-- ============ BOOKS ============ -->
+<section id="books">
+  <h2>Self-study books</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Pairs with</th><th scope="col">Book</th></tr></thead>
+      <tbody>
+        <tr><td>Before semester 1</td><td>Deisenroth, Faisal and Ong, <i>Mathematics for Machine Learning</i></td></tr>
+        <tr><td><span class="code">CSE752</span></td><td>Bishop and Bishop, <i>Deep Learning: Foundations and Concepts</i>; Prince, <i>Understanding Deep Learning</i></td></tr>
+        <tr><td><span class="code">CSE717</span></td><td>Boyd and Vandenberghe, <i>Convex Optimization</i>, chapters 2–5</td></tr>
+        <tr><td><span class="code">CSE756</span></td><td>Koller and Friedman, <i>Probabilistic Graphical Models</i></td></tr>
+        <tr><td><span class="code">CSE755</span></td><td>Murphy, <i>Probabilistic Machine Learning: Advanced Topics</i></td></tr>
+        <tr><td><span class="code">CSE753</span></td><td>Sutton and Barto, <i>Reinforcement Learning: An Introduction</i></td></tr>
+        <tr><td><span class="code">CSE751</span></td><td>Jurafsky and Martin, <i>Speech and Language Processing</i>, 3rd edition draft</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  Built from the official course descriptions (Fall 2026) and program rules at <a href="https://cse.bracu.ac.bd/postgraduate/program">cse.bracu.ac.bd/postgraduate/program</a>. Ratings reflect the syllabi, not grading data, so confirm assessment details with seniors.
+</footer>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+(function () {
+  if (window.mermaid) {
+    var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    try { window.mermaid.initialize({ startOnLoad: true, theme: dark ? 'dark' : 'default', securityLevel: 'strict' }); } catch (e) {}
+  }
+})();
+</script>
+<script>
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  function select(tab) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      var p = document.getElementById(t.getAttribute('aria-controls'));
+      if (p) p.hidden = !on;
+    });
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(t); });
+    t.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        var n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+        select(n); n.focus();
+      }
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-open]'), function (b) {
+    b.addEventListener('click', function () {
+      var t = document.getElementById('tab-' + b.getAttribute('data-open'));
+      if (t) { select(t); t.focus(); }
+    });
+  });
+
+  var KEY = 'msc-plan-checks-v1';
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { state = {}; }
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('.check input[type="checkbox"]'));
+  function updateCounts() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-group]'), function (g) {
+      var bs = g.querySelectorAll('input[type="checkbox"]');
+      var done = 0;
+      Array.prototype.forEach.call(bs, function (b) { if (b.checked) done++; });
+      var out = g.querySelector('.count');
+      if (out) out.textContent = done + ' of ' + bs.length + ' done';
+    });
+  }
+  boxes.forEach(function (b) {
+    if (state[b.id]) b.checked = true;
+    b.addEventListener('change', function () {
+      state[b.id] = b.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+      updateCounts();
+    });
+  });
+  var clear = document.getElementById('clear-checks');
+  if (clear) clear.addEventListener('click', function () {
+    boxes.forEach(function (b) { b.checked = false; });
+    state = {};
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    updateCounts();
+  });
+  updateCounts();
+})();
+</script>
+</body>
+</html>
