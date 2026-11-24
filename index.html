@@ -116,29 +116,17 @@
           <p>Select courses across views to compare them. Use a Details button when you want a course outline or study links.</p>
         </div>
       </div>
-      <div class="explorer-tabs" role="tablist" aria-label="Course explorer">
-        <button class="explorer-tab is-active" id="tab-dependencies" role="tab" aria-selected="true" aria-controls="panel-dependencies" tabindex="0" data-tab="dependencies">Dependencies</button>
-        <button class="explorer-tab" id="tab-skills" role="tab" aria-selected="false" aria-controls="panel-skills" tabindex="-1" data-tab="skills">Skills map</button>
-        <button class="explorer-tab" id="tab-overlap" role="tab" aria-selected="false" aria-controls="panel-overlap" tabindex="-1" data-tab="overlap">Topic overlap</button>
-        <button class="explorer-tab" id="tab-table" role="tab" aria-selected="false" aria-controls="panel-table" tabindex="-1" data-tab="table">Course table</button>
-      </div>
+      <nav class="explorer-tabs" aria-label="Jump to a course view">
+        <a class="explorer-tab" href="#panel-skills">Skills map</a>
+        <a class="explorer-tab" href="#panel-overlap">Topic overlap</a>
+        <a class="explorer-tab" href="#panel-table">Course table</a>
+        <a class="explorer-tab" href="#panel-dependencies">Dependencies</a>
+      </nav>
       <div class="selection-toolbar" id="selection-toolbar" aria-live="polite"><strong id="selection-summary"></strong><div class="selection-course-list" id="selection-course-list"></div><button class="button button-outline button-small" id="clear-selection" type="button">Clear selection</button></div>
 
-      <section class="explorer-panel" id="panel-dependencies" role="tabpanel" aria-labelledby="tab-dependencies" data-panel="dependencies">
+      <section class="explorer-panel" id="panel-skills" aria-labelledby="skills-title">
         <div class="panel-intro">
-          <div><h3>What builds on what</h3><p>Click courses to select several at once. Hover a selected course and use Details to open its outline. Blank space clears your selection.</p><span class="view-count" id="dependencies-count"></span></div>
-          <div class="segmented" role="group" aria-label="Dependency graph scope">
-            <button type="button" data-graph-scope="plan" aria-pressed="true">My plan</button>
-            <button type="button" data-graph-scope="catalog" aria-pressed="false">Visible catalog</button>
-          </div>
-        </div>
-        <div class="graph-legend" aria-label="Graph legend"><span><i class="legend-line formal"></i>Formal prerequisite</span><span><i class="legend-line advisory"></i>Suggested preparation</span></div>
-        <div class="graph-frame" id="dependency-frame"><svg id="dependency-graph" role="group" aria-label="Course dependency graph"></svg></div>
-      </section>
-
-      <section class="explorer-panel" id="panel-skills" role="tabpanel" aria-labelledby="tab-skills" data-panel="skills" hidden>
-        <div class="panel-intro">
-          <div><h3>Course coverage by topic</h3><p>Click courses or topics to compare them. Green marks your semester plan; blue marks your current selection. Hover a course and choose Details to open its outline.</p><span class="view-count" id="skills-count"></span></div>
+          <div><h3 id="skills-title">Course coverage by topic</h3><p>Click courses or topics to compare them. Green marks your semester plan; blue marks your current selection. Hover a course and choose Details to open its outline.</p><span class="view-count" id="skills-count"></span></div>
           <div class="segmented" role="group" aria-label="Skill map emphasis">
             <button type="button" data-lens="all" aria-pressed="true">All topics</button>
             <button type="button" data-lens="academia" aria-pressed="false">Academic</button>
@@ -150,21 +138,33 @@
         <div class="selected-topic" id="selected-topic" aria-live="polite"></div>
       </section>
 
-      <section class="explorer-panel" id="panel-overlap" role="tabpanel" aria-labelledby="tab-overlap" data-panel="overlap" hidden>
+      <section class="explorer-panel" id="panel-overlap" aria-labelledby="overlap-title">
         <div class="panel-intro">
-          <div><h3>Topic overlap by course</h3><p>The Venn diagram compares two or three selected courses. The matrix below shows exactly which topics each available course covers.</p><span class="view-count" id="overlap-count"></span></div>
+          <div><h3 id="overlap-title">Topic overlap by course</h3><p>The Venn diagram compares up to three selected courses; the matrix shows topic coverage across every available course. Choose course names in the matrix to change the comparison.</p><span class="view-count" id="overlap-count"></span></div>
         </div>
         <div class="venn-wrap" id="venn-view" aria-live="polite"></div>
         <div class="matrix-heading"><h4>Topic coverage by course</h4><p>● Core coverage · ○ related coverage · — not mapped. Topic rows show whether your plan covers each skill. Select column headings to compare courses.</p></div>
         <div class="matrix-frame topic-matrix-frame" id="topic-matrix"></div>
       </section>
 
-      <section class="explorer-panel" id="panel-table" role="tabpanel" aria-labelledby="tab-table" data-panel="table" hidden>
+      <section class="explorer-panel" id="panel-table" aria-labelledby="table-title">
         <div class="panel-intro">
-          <div><h3>Course list</h3><p>Select course codes to compare them across views. Hover a course and use Details to open its outline.</p><span class="view-count" id="table-count"></span></div>
+          <div><h3 id="table-title">Course table</h3><p>Select course codes to compare them across views. Hover a course and use Details to open its outline.</p><span class="view-count" id="table-count"></span></div>
           <label class="table-search">Filter <input type="search" id="table-search" placeholder="Course or topic"></label>
         </div>
         <div class="table-frame" id="course-table"></div>
+      </section>
+
+      <section class="explorer-panel" id="panel-dependencies" aria-labelledby="dependencies-title">
+        <div class="panel-intro">
+          <div><h3 id="dependencies-title">What builds on what</h3><p>Click courses to select several at once. Hover a selected course and use Details to open its outline. Blank space clears your selection.</p><span class="view-count" id="dependencies-count"></span></div>
+          <div class="segmented" role="group" aria-label="Dependency graph scope">
+            <button type="button" data-graph-scope="plan" aria-pressed="true">My plan</button>
+            <button type="button" data-graph-scope="catalog" aria-pressed="false">Visible catalog</button>
+          </div>
+        </div>
+        <div class="graph-legend" aria-label="Graph legend"><span><i class="legend-line formal"></i>Formal prerequisite</span><span><i class="legend-line advisory"></i>Suggested preparation</span></div>
+        <div class="graph-frame" id="dependency-frame"><svg id="dependency-graph" role="group" aria-label="Course dependency graph"></svg></div>
       </section>
     </section>
 
