@@ -9,8 +9,9 @@
   const topicIds = DATA.topicGroups.flatMap(group => group.topics);
   const STORE_KEY = 'brac-msccse-planner-v2';
   const defaultPlan = DATA.plans.find(plan => plan.id === 'C');
-  let selectedCode = null;
+  let selectedCourses = new Set();
   let selectedTopic = null;
+  let dialogCode = null;
   let catalogFilter = 'all';
   let graphScope = 'plan';
   let skillLens = 'all';
@@ -24,7 +25,7 @@
       showOutside: false,
       checks: {},
       customTasks: [],
-      overlapCodes: ['CSE752', 'CSE754'],
+      selectedCourses: ['CSE752', 'CSE754'],
       preset: plan.id,
       activeTab: 'dependencies'
     };
@@ -49,7 +50,7 @@
       showOutside: Boolean(candidate.showOutside),
       checks: candidate.checks && typeof candidate.checks === 'object' ? candidate.checks : {},
       customTasks: Array.isArray(candidate.customTasks) ? candidate.customTasks.filter(task => task && typeof task.text === 'string').slice(0, 150) : [],
-      overlapCodes: Array.isArray(candidate.overlapCodes) ? candidate.overlapCodes.filter(code => byCode.has(code)).slice(0, 3) : ['CSE752', 'CSE754'],
+      selectedCourses: Array.isArray(candidate.selectedCourses) ? candidate.selectedCourses.filter(code => byCode.has(code)) : Array.isArray(candidate.overlapCodes) ? candidate.overlapCodes.filter(code => byCode.has(code)) : ['CSE752', 'CSE754'],
       preset: DATA.plans.some(plan => plan.id === candidate.preset) ? candidate.preset : null,
       activeTab: ['dependencies', 'skills', 'overlap', 'table'].includes(candidate.activeTab) ? candidate.activeTab : 'dependencies'
     };
@@ -95,6 +96,7 @@
   }
 
   let state = loadState();
+  selectedCourses = new Set(state.selectedCourses.filter(code => byCode.has(code)));
 
   function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -179,7 +181,7 @@
       ${courses.map(course => {
         const location = currentLocation(course.code);
         const status = location === null ? (course.type === 'datascience' && course.recommended ? '<span class="inline-status recommended">Recommended</span>' : '') : `<span class="inline-status">S${location + 1}</span>`;
-        return `<button type="button" class="course-option${selectedCode === course.code ? ' is-selected' : ''}" data-open-course="${escapeHtml(course.code)}" aria-pressed="${selectedCode === course.code}" draggable="true" data-drag-code="${escapeHtml(course.code)}">
+        return `<button type="button" class="course-option${selectedCourses.has(course.code) ? ' is-selected' : ''}" data-open-course="${escapeHtml(course.code)}" draggable="true" data-drag-code="${escapeHtml(course.code)}">
           <span class="course-option-copy"><span class="course-option-code">${escapeHtml(course.code)} · ${course.credits} cr</span><span class="course-option-title">${escapeHtml(course.title)}</span><span class="course-option-meta">${escapeHtml(course.sourceGroup || course.category)}</span></span>${status}
         </button>`;
       }).join('')}
@@ -192,9 +194,9 @@
       const coursesHtml = semester.courses.length ? semester.courses.map(code => {
         const course = byCode.get(code);
         if (!course) return '';
-        return `<article class="planned-course${selectedCode === code ? ' is-selected' : ''}" draggable="true" data-drag-code="${escapeHtml(code)}">
-          <button class="planned-course-main" type="button" data-open-course="${escapeHtml(code)}" aria-label="Inspect ${escapeHtml(code)} ${escapeHtml(course.title)}"><b>${escapeHtml(code)} · ${course.credits} cr</b><span>${escapeHtml(course.title)}</span></button>
-          <button class="course-remove" type="button" data-remove-course="${escapeHtml(code)}" aria-label="Remove ${escapeHtml(code)} from plan" title="Remove from plan">Remove</button>
+        return `<article class="planned-course is-planned${selectedCourses.has(code) ? ' is-selected' : ''}" draggable="true" data-drag-code="${escapeHtml(code)}">
+          <button class="planned-course-main" type="button" data-select-course="${escapeHtml(code)}" aria-pressed="${selectedCourses.has(code)}" aria-label="Select ${escapeHtml(code)} ${escapeHtml(course.title)}"><b>${escapeHtml(code)} · ${course.credits} cr</b><span>${escapeHtml(course.title)}</span></button>
+          <button class="course-detail-action" type="button" data-course-details="${escapeHtml(code)}">Details</button><button class="course-remove" type="button" data-remove-course="${escapeHtml(code)}" aria-label="Remove ${escapeHtml(code)} from plan" title="Remove from plan">Remove</button>
           ${courseTag(course)}
         </article>`;
       }).join('') : '<div class="semester-empty">Drag or add a course here</div>';
@@ -296,12 +298,9 @@
     renderSummary();
     renderCatalog();
     renderBoard();
-    renderDependencyGraph();
-    renderSkillsGraph();
-    renderOverlap();
-    renderCourseTable();
+    renderExplorerViews();
     renderSupportingNotes();
-    if ($('#course-dialog').open && selectedCode) renderCourseDialog(selectedCode, false);
+    if ($('#course-dialog').open && dialogCode) renderCourseDialog(dialogCode, false);
   }
 
   function markCustom() { state.preset = null; }
@@ -347,9 +346,8 @@
     next.showOutside = state.showOutside;
     next.checks = state.checks;
     next.customTasks = state.customTasks;
-    next.overlapCodes = state.overlapCodes;
+    next.selectedCourses = [...selectedCourses];
     state = next;
-    selectedCode = null;
     statusMessage = `${plan.name} loaded · saved in this browser`;
     saveState();
     showToast(`${plan.name} loaded. You can now edit the semester board.`);
@@ -361,8 +359,7 @@
 
   function openCourse(code) {
     if (!byCode.has(code)) return;
-    selectedCode = code;
-    selectedTopic = null;
+    dialogCode = code;
     renderAll();
     renderCourseDialog(code, true);
   }
@@ -405,9 +402,56 @@
     showToast('Added to your checklist.');
   }
 
-  function setOverlapCodes(codes) {
-    state.overlapCodes = codes.filter(Boolean).slice(0, 3);
+  function renderExplorerViews() {
+    renderExplorerSelection();
+    renderDependencyGraph();
+    renderSkillsGraph();
+    renderOverlap();
+    renderCourseTable();
+  }
+
+  function renderExplorerSelection() {
+    const codes = [...selectedCourses];
+    $('#selection-summary').textContent = codes.length
+      ? `${codes.length} course${codes.length === 1 ? '' : 's'} selected · click a course to toggle it`
+      : 'No courses selected · select courses in any view to compare them';
+    $('#selection-course-list').innerHTML = codes.map(code => {
+      return `<span class="selection-chip"><span>${escapeHtml(code)}</span><button type="button" data-course-details="${escapeHtml(code)}">Details</button><button type="button" class="selection-remove" data-remove-selection="${escapeHtml(code)}" aria-label="Remove ${escapeHtml(code)} from selection">×</button></span>`;
+    }).join('');
+    $('#clear-selection').disabled = codes.length === 0 && !selectedTopic;
+  }
+
+  function toggleCourseSelection(code) {
+    if (!byCode.has(code)) return;
+    if (selectedCourses.has(code)) selectedCourses.delete(code);
+    else selectedCourses.add(code);
+    state.selectedCourses = [...selectedCourses];
+    statusMessage = selectedCourses.has(code) ? `${code} selected` : `${code} deselected`;
     saveState();
+  }
+
+  function clearExplorerSelection() {
+    if (!selectedCourses.size && !selectedTopic) return;
+    selectedCourses.clear();
+    selectedTopic = null;
+    state.selectedCourses = [];
+    statusMessage = 'Explorer selection cleared';
+    saveState();
+  }
+
+  function planTopicStatus(topicId) {
+    const weights = allScheduled().map(code => byCode.get(code)?.topics?.[topicId] || 0);
+    if (weights.some(weight => weight >= 2)) return 'core';
+    if (weights.some(weight => weight > 0)) return 'related';
+    return 'gap';
+  }
+
+  function selectedTopicIds() {
+    const ids = new Set();
+    for (const code of selectedCourses) {
+      for (const topicId of Object.keys(byCode.get(code)?.topics || {})) ids.add(topicId);
+    }
+    return ids;
   }
 
   function renderDependencyGraph() {
@@ -426,7 +470,7 @@
     const remainingOutside = courses.filter(course => course.type === 'outside' && !stages.some(stage => stage.codes.includes(course.code)));
     if (remainingOutside.length) stages.push({ name: 'Outside options', courses: remainingOutside });
     const activeStages = stages.filter(stage => stage.courses.length);
-    const nodeW = 188, nodeH = 60, columnGap = 38, left = 20, top = 39, bottom = 20, rowGap = 13;
+    const nodeW = 252, nodeH = 88, columnGap = 52, left = 26, top = 54, bottom = 26, rowGap = 18;
     const maxRows = Math.max(1, ...activeStages.map(stage => stage.courses.length));
     const height = top + bottom + maxRows * (nodeH + rowGap) - rowGap;
     const width = left * 2 + activeStages.length * nodeW + Math.max(0, activeStages.length - 1) * columnGap;
@@ -439,8 +483,7 @@
       const parents = [...(course.prerequisites || []), ...(course.preparation || [])];
       for (const parent of new Set(parents)) {
         if (!positions.has(parent) || !positions.has(course.code)) continue;
-        const formal = parent === 'CSE791' && course.code === 'CSE700B';
-        edges.push({ from: parent, to: course.code, formal });
+        edges.push({ from: parent, to: course.code, formal: parent === 'CSE791' && course.code === 'CSE700B' });
       }
     }
     if (positions.has('CSE791') && positions.has('CSE700B') && !edges.some(edge => edge.from === 'CSE791' && edge.to === 'CSE700B')) edges.push({ from: 'CSE791', to: 'CSE700B', formal: true });
@@ -449,162 +492,188 @@
       const a = positions.get(edge.from), b = positions.get(edge.to);
       const startX = a.x + nodeW, endX = b.x;
       const delta = Math.max(20, (endX - startX) * .5);
-      const connected = !selectedCode || edge.from === selectedCode || edge.to === selectedCode;
+      const connected = [...selectedCourses].some(code => edge.from === code || edge.to === code);
       const path = a.x === b.x
         ? `M ${a.cx} ${a.y + nodeH} C ${a.cx + 22} ${a.y + nodeH + 8}, ${b.cx + 22} ${b.y - 8}, ${b.cx} ${b.y}`
         : `M ${startX} ${a.cy} C ${startX + delta} ${a.cy}, ${endX - delta} ${b.cy}, ${endX} ${b.cy}`;
-      return `<path class="graph-edge${edge.formal ? ' formal' : ' advisory'}${selectedCode && connected ? ' is-highlight' : ''}${selectedCode && !connected ? ' is-dim' : ''}" d="${path}"/>`;
+      return `<path class="graph-edge${edge.formal ? ' formal' : ' advisory'}${selectedCourses.size && connected ? ' is-highlight' : ''}${selectedCourses.size && !connected ? ' is-dim' : ''}" d="${path}"/>`;
     }).join('');
-    const columnsMarkup = activeStages.map((stage, column) => `<text class="graph-column-title" x="${left + column * (nodeW + columnGap)}" y="22">${escapeHtml(stage.name)}</text>`).join('');
+    const columnsMarkup = activeStages.map((stage, column) => `<text class="graph-column-title" x="${left + column * (nodeW + columnGap)}" y="30">${escapeHtml(stage.name)}</text>`).join('');
     const nodesMarkup = activeStages.flatMap(stage => stage.courses).map(course => {
-      const p = positions.get(course.code);
+      const point = positions.get(course.code);
       const planned = currentLocation(course.code) !== null;
-      const dim = selectedCode && selectedCode !== course.code && !(course.preparation || []).includes(selectedCode) && !(course.prerequisites || []).includes(selectedCode);
-      const label = course.type === 'outside' ? course.sourceGroup : planned ? 'In your plan' : course.type === 'required' ? 'Mandatory' : course.type === 'thesis' ? 'Thesis' : 'Data Science';
-      return `<g class="graph-node${planned ? ' is-planned' : ''}${selectedCode === course.code ? ' is-selected' : ''}${dim ? ' is-dim' : ''}" transform="translate(${p.x},${p.y})" tabindex="0" role="button" aria-label="Inspect ${escapeHtml(course.code)} ${escapeHtml(course.title)}" data-open-course="${escapeHtml(course.code)}"><rect width="${nodeW}" height="${nodeH}" rx="6"/><text x="10" y="18" font-size="11" font-weight="700">${escapeHtml(course.code)} · ${course.credits} cr</text><text x="10" y="36" font-size="11">${escapeHtml(course.title.length > 25 ? course.title.slice(0, 23) + '…' : course.title)}</text><text x="10" y="51" font-size="9" fill="var(--ink-soft)">${escapeHtml(label)}</text></g>`;
+      const selected = selectedCourses.has(course.code);
+      const related = [...selectedCourses].some(code => (byCode.get(code)?.preparation || []).includes(course.code) || (byCode.get(code)?.prerequisites || []).includes(course.code) || (course.preparation || []).includes(code) || (course.prerequisites || []).includes(code));
+      const dim = selectedCourses.size > 0 && !selected && !related;
+      const label = planned ? 'In your plan' : course.type === 'outside' ? course.sourceGroup : course.type === 'required' ? 'Mandatory' : course.type === 'thesis' ? 'Thesis' : 'Data Science';
+      const title = course.title.length > 29 ? course.title.slice(0, 27) + '…' : course.title;
+      return `<g class="graph-node${planned ? ' is-planned' : ''}${selected ? ' is-selected' : ''}${dim ? ' is-dim' : ''}" transform="translate(${point.x},${point.y})"><g class="graph-node-select" tabindex="0" role="button" aria-pressed="${selected}" aria-label="Select ${escapeHtml(course.code)} ${escapeHtml(course.title)}" data-select-course="${escapeHtml(course.code)}"><rect width="${nodeW}" height="${nodeH}" rx="8"/><text x="14" y="25" font-size="16" font-weight="700">${escapeHtml(course.code)} · ${course.credits} cr</text><text x="14" y="49" font-size="15">${escapeHtml(title)}</text><text class="node-status" x="14" y="72" font-size="13">${escapeHtml(label)}</text></g><g class="graph-node-action" transform="translate(${nodeW - 88},8)" tabindex="0" role="button" aria-label="Open details for ${escapeHtml(course.code)}" data-course-details="${escapeHtml(course.code)}"><rect width="76" height="30" rx="5"/><text x="38" y="20" text-anchor="middle" font-size="13">Details</text></g></g>`;
     }).join('');
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
     svg.setAttribute('width', width);
     svg.setAttribute('height', height);
     svg.innerHTML = `${columnsMarkup}${edgeMarkup}${nodesMarkup}`;
-  }
-
-  function planTopicWeight(topicId) {
-    return allScheduled().reduce((best, code) => Math.max(best, byCode.get(code)?.topics?.[topicId] || 0), 0);
+    const availableCount = visibleCourses(true).length;
+    $('#dependencies-count').textContent = graphScope === 'plan' ? `${courses.length} planned courses shown · ${availableCount} courses available in the catalog` : `${courses.length} of ${availableCount} available courses shown`;
   }
 
   function renderSkillsGraph() {
     const svg = $('#skills-graph');
     const courses = visibleCourses(true).filter(course => course.code !== 'CSE700');
-    const leftX = 16, leftW = 278, rightX = 760, rightW = 295, nodeH = 25, rowStep = 31;
-    let topicY = 30;
+    const selectedTopics = selectedTopicIds();
+    const leftX = 28, leftW = 438, rightX = 1510, rightW = 540, nodeH = 40, rowStep = 49;
+    let topicY = 42;
     const topicPositions = new Map();
     const topicHeaders = [];
     for (const group of DATA.topicGroups) {
-      topicHeaders.push({ name: group.name, y: topicY + 15 });
-      topicY += 23;
+      topicHeaders.push({ name: group.name, y: topicY + 19 });
+      topicY += 28;
       for (const id of group.topics) { topicPositions.set(id, topicY); topicY += rowStep; }
-      topicY += 6;
+      topicY += 12;
     }
-    const courseTop = 30;
+    const courseTop = 42;
     const coursePositions = new Map(courses.map((course, index) => [course.code, courseTop + index * rowStep]));
-    const height = Math.max(topicY + 6, courseTop + courses.length * rowStep + 15);
+    const height = Math.max(topicY + 14, courseTop + courses.length * rowStep + 22);
     const edges = [];
     for (const course of courses) {
       const y1 = coursePositions.get(course.code) + nodeH / 2;
       for (const [topicId, weight] of Object.entries(course.topics || {})) {
         if (!topicPositions.has(topicId)) continue;
         const y2 = topicPositions.get(topicId) + nodeH / 2;
-        let dim = false;
         const topic = topicById[topicId];
-        if (skillLens === 'academia' && topic.a < 3) dim = true;
-        if (skillLens === 'industry' && topic.i < 3) dim = true;
-        if (selectedCode && selectedCode !== course.code && !(byCode.get(selectedCode)?.topics?.[topicId])) dim = true;
-        if (selectedTopic && selectedTopic !== topicId) dim = true;
-        if (selectedTopic && selectedTopic === topicId) dim = false;
-        const pathClass = `skill-edge${weight >= 2 ? ' core' : ''}${dim ? ' is-dim' : ''}${(selectedCode === course.code || selectedTopic === topicId) ? ' is-highlight' : ''}`;
-        edges.push(`<path class="${pathClass}" d="M ${leftX + leftW} ${y1} C 515 ${y1}, 535 ${y2}, ${rightX} ${y2}"/>`);
+        const lensDim = (skillLens === 'academia' && topic.a < 3) || (skillLens === 'industry' && topic.i < 3);
+        const selectionDim = selectedCourses.size > 0 && !selectedCourses.has(course.code) && !selectedTopics.has(topicId);
+        const topicDim = selectedTopic && selectedTopic !== topicId;
+        const highlighted = selectedCourses.has(course.code) || selectedTopic === topicId;
+        const planned = currentLocation(course.code) !== null;
+        const classes = `skill-edge${weight >= 2 ? ' core' : ''}${planned ? ' is-plan' : ''}${highlighted ? ' is-highlight' : ''}${lensDim || selectionDim || topicDim ? ' is-dim' : ''}`;
+        edges.push(`<path class="${classes}" d="M ${leftX + leftW} ${y1} C 880 ${y1}, 1080 ${y2}, ${rightX} ${y2}"/>`);
       }
     }
     const headers = topicHeaders.map(item => `<text class="graph-column-title" x="${rightX}" y="${item.y}">${escapeHtml(item.name)}</text>`).join('');
     const courseNodes = courses.map(course => {
       const y = coursePositions.get(course.code);
-      const selected = selectedCode === course.code;
+      const selected = selectedCourses.has(course.code);
       const planned = currentLocation(course.code) !== null;
-      const fade = selectedTopic && !course.topics?.[selectedTopic];
+      const related = Object.keys(course.topics || {}).some(id => selectedTopics.has(id));
+      const fade = (selectedCourses.size > 0 && !selected && !related) || (selectedTopic && !course.topics?.[selectedTopic]);
       const caption = course.code + ' · ' + (course.short || course.title);
-      return `<g class="skill-node graph-node${selected ? ' is-selected' : ''}${planned ? ' is-planned' : ''}${fade ? ' is-dim' : ''}" transform="translate(${leftX},${y})" tabindex="0" role="button" aria-label="Inspect ${escapeHtml(course.code)} ${escapeHtml(course.title)}" data-open-course="${escapeHtml(course.code)}"><rect width="${leftW}" height="${nodeH}" rx="5"/><text x="8" y="17" font-size="10">${escapeHtml(caption.length > 41 ? caption.slice(0, 39) + '…' : caption)}</text></g>`;
+      return `<g class="skill-node graph-node${selected ? ' is-selected' : ''}${planned ? ' is-planned' : ''}${fade ? ' is-dim' : ''}" transform="translate(${leftX},${y})"><g class="graph-node-select" tabindex="0" role="button" aria-pressed="${selected}" aria-label="Select ${escapeHtml(course.code)} ${escapeHtml(course.title)}" data-select-course="${escapeHtml(course.code)}"><rect width="${leftW}" height="${nodeH}" rx="7"/><text x="12" y="26" font-size="16">${escapeHtml(caption.length > 36 ? caption.slice(0, 34) + '…' : caption)}</text></g><g class="graph-node-action" transform="translate(${leftW - 98},6)" tabindex="0" role="button" aria-label="Open details for ${escapeHtml(course.code)}" data-course-details="${escapeHtml(course.code)}"><rect width="86" height="28" rx="5"/><text x="43" y="19" text-anchor="middle" font-size="13">Details</text></g></g>`;
     }).join('');
     const topics = topicIds.map(id => {
       const topic = topicById[id];
       const y = topicPositions.get(id);
-      const gap = planTopicWeight(id) < 2;
-      const faded = (skillLens === 'academia' && topic.a < 3) || (skillLens === 'industry' && topic.i < 3);
-      return `<g class="skill-node${selectedTopic === id ? ' is-selected' : ''}${gap ? ' is-gap' : ''}${faded ? ' is-dim' : ''}" transform="translate(${rightX},${y})" tabindex="0" role="button" aria-pressed="${selectedTopic === id}" aria-label="${escapeHtml(topic.name)}${gap ? ', a gap in the current plan' : ''}" data-topic="${escapeHtml(id)}"><rect width="${rightW}" height="${nodeH}" rx="5"/><text x="8" y="17" font-size="10">${escapeHtml(topic.name)}</text><text x="${rightW - 61}" y="17" font-size="8" fill="var(--ink-soft)">A ${topic.a} · I ${topic.i}</text></g>`;
+      const planStatus = planTopicStatus(id);
+      const selected = selectedTopic === id;
+      const touched = selectedTopics.has(id);
+      const faded = (skillLens === 'academia' && topic.a < 3) || (skillLens === 'industry' && topic.i < 3) || (selectedCourses.size > 0 && !touched);
+      return `<g class="skill-node topic-node ${planStatus}${selected ? ' is-selected' : ''}${touched ? ' is-touched' : ''}${faded ? ' is-dim' : ''}" transform="translate(${rightX},${y})" tabindex="0" role="button" aria-pressed="${selected}" aria-label="${escapeHtml(topic.name)}; ${planStatus === 'gap' ? 'a gap in the current plan' : `${planStatus} coverage in the current plan`}" data-topic="${escapeHtml(id)}"><rect width="${rightW}" height="${nodeH}" rx="7"/><text x="12" y="26" font-size="16">${escapeHtml(topic.name)}</text><text class="topic-status" x="${rightW - 174}" y="25" font-size="12">${planStatus === 'core' ? 'Core in plan' : planStatus === 'related' ? 'Related in plan' : 'Gap in plan'} · A ${topic.a} / I ${topic.i}</text></g>`;
     }).join('');
-    svg.setAttribute('viewBox', `0 0 1080 ${height}`);
-    svg.setAttribute('width', '1080');
+    svg.setAttribute('viewBox', `0 0 2080 ${height}`);
+    svg.setAttribute('width', '2080');
     svg.setAttribute('height', height);
     svg.innerHTML = `${headers}${edges.join('')}${courseNodes}${topics}`;
+    const plannedCount = courses.filter(course => currentLocation(course.code) !== null).length;
+    $('#skills-count').textContent = `${courses.length} courses with topic mappings · ${visibleCourses(true).length} available overall · ${plannedCount} in this map · ${topicIds.length} topics`;
     if (selectedTopic) {
       const topic = topicById[selectedTopic];
-      const common = courses.filter(course => course.topics?.[selectedTopic]).map(course => course.code).join(', ');
-      $('#selected-topic').innerHTML = `<b>${escapeHtml(topic.name)}:</b> ${escapeHtml(topic.acad)} ${escapeHtml(topic.ind)} <span>Courses mapped here: ${escapeHtml(common || 'none')}.</span>`;
+      const mapped = courses.filter(course => course.topics?.[selectedTopic]);
+      const selectedMapped = mapped.filter(course => selectedCourses.has(course.code)).map(course => course.code);
+      const status = planTopicStatus(selectedTopic);
+      $('#selected-topic').innerHTML = `<b>${escapeHtml(topic.name)}:</b> ${escapeHtml(topic.acad)} ${escapeHtml(topic.ind)} <span>${status === 'gap' ? 'Gap in the current plan.' : `${status} coverage in the current plan.`} Courses mapped here: ${escapeHtml(mapped.map(course => course.code).join(', ') || 'none')}.${selectedCourses.size ? ` Selected courses covering it: ${escapeHtml(selectedMapped.join(', ') || 'none')}.` : ''}</span>`;
     } else {
-      $('#selected-topic').textContent = 'Select a topic to read its academic and industry context. Course topic mappings are advisory.';
+      $('#selected-topic').textContent = `Select a topic to see its academic and industry context. ${topicIds.length} topics are mapped across ${courses.length} visible courses.`;
     }
-  }
-
-  function overlapCount(a, b) {
-    const one = byCode.get(a), two = byCode.get(b);
-    if (!one || !two) return 0;
-    return Object.keys(one.topics || {}).filter(id => two.topics?.[id]).length;
-  }
-
-  function renderOverlapSelectors() {
-    const courses = electiveCourses().sort((a, b) => a.code.localeCompare(b.code));
-    if (!state.overlapCodes || state.overlapCodes.length < 2) state.overlapCodes = ['CSE752', 'CSE754'];
-    const controls = [0, 1, 2].map(index => {
-      const value = state.overlapCodes[index] || '';
-      const label = index === 0 ? 'Course A' : index === 1 ? 'Course B' : 'Course C (optional)';
-      return `<label class="overlap-select">${label}<select data-overlap-select="${index}" aria-label="${label}"><option value="">Choose a course</option>${courses.map(course => `<option value="${escapeHtml(course.code)}" ${course.code === value ? 'selected' : ''}>${escapeHtml(course.code)} · ${escapeHtml(course.title)}</option>`).join('')}</select></label>`;
-    }).join('');
-    $('#overlap-selectors').innerHTML = controls;
   }
 
   function renderVenn() {
-    const codes = (state.overlapCodes || []).filter(Boolean).slice(0, 3);
+    const codes = [...selectedCourses].slice(0, 3);
     const courses = codes.map(code => byCode.get(code)).filter(Boolean);
     const box = $('#venn-view');
     if (courses.length < 2) {
-      box.innerHTML = '<p class="empty-message">Choose at least two courses to compare their mapped topics.</p>';
+      box.innerHTML = `<div class="venn-empty"><b>Select two or three courses to compare their mapped topics.</b><p>${selectedCourses.size ? `${selectedCourses.size} course selected. Add another course in any view.` : 'Choose courses on the Skills map, Dependencies view, or topic matrix.'}</p></div>`;
       return;
     }
-    const keys = Array.from({ length: (1 << courses.length) - 1 }, (_, index) => index + 1);
-    const buckets = new Map(keys.map(key => [key, []]));
+    const regions = new Map();
+    for (let mask = 1; mask < (1 << courses.length); mask += 1) regions.set(mask, []);
     for (const id of topicIds) {
       let mask = 0;
       courses.forEach((course, index) => { if (course.topics?.[id]) mask |= (1 << index); });
-      if (mask) buckets.get(mask)?.push(topicById[id]?.name || id);
+      if (mask) regions.get(mask)?.push(topicById[id]?.name || id);
     }
-    const labels = keys.map(mask => {
+    const positions = courses.length === 2
+      ? { 1: [265, 235, 'Only in A'], 3: [450, 235, 'Shared'], 2: [635, 235, 'Only in B'] }
+      : { 1: [315, 170, 'Only in A'], 2: [585, 170, 'Only in B'], 4: [450, 402, 'Only in C'], 3: [450, 116, 'A + B'], 5: [360, 292, 'A + C'], 6: [540, 292, 'B + C'], 7: [450, 222, 'Shared by all'] };
+    const circles = courses.length === 2
+      ? `<circle class="venn-circle set-a" cx="350" cy="235" r="175"/><circle class="venn-circle set-b" cx="550" cy="235" r="175"/>`
+      : `<circle class="venn-circle set-a" cx="355" cy="185" r="172"/><circle class="venn-circle set-b" cx="545" cy="185" r="172"/><circle class="venn-circle set-c" cx="450" cy="315" r="172"/>`;
+    const setLabels = courses.map((course, index) => {
+      const points = courses.length === 2 ? [[282, 42], [570, 42]] : [[240, 40], [560, 40], [400, 492]];
+      return `<text class="venn-set-label set-${'abc'[index]}" x="${points[index][0]}" y="${points[index][1]}">${escapeHtml(course.code)}</text>`;
+    }).join('');
+    const labels = [...regions.entries()].map(([mask, topics]) => {
+      const [x, y, label] = positions[mask];
+      const shared = mask === (1 << courses.length) - 1 || (mask & (mask - 1)) !== 0;
+      return `<g class="venn-region-count${shared ? ' shared' : ''}" transform="translate(${x},${y})"><text class="venn-count" text-anchor="middle">${topics.length}</text><text class="venn-caption" y="21" text-anchor="middle">${escapeHtml(label)}</text></g>`;
+    }).join('');
+    const topicLists = [...regions.entries()].map(([mask, topics]) => {
       const members = courses.filter((course, index) => mask & (1 << index)).map(course => course.code);
-      const absent = courses.filter((course, index) => !(mask & (1 << index))).map(course => course.code);
-      return { mask, label: `${members.join(' + ')} only${absent.length ? ` · not ${absent.join(', ')}` : ''}`, topics: buckets.get(mask) || [] };
-    });
-    box.innerHTML = `<h4 class="venn-title">${courses.map(course => escapeHtml(course.code)).join(' compared with ')}</h4><div class="venn-regions">${labels.map(region => `<div class="venn-region${(region.mask & (region.mask - 1)) ? ' is-shared' : ''}"><span class="venn-region-label">${escapeHtml(region.label)}</span><div class="venn-topics">${region.topics.length ? region.topics.map(escapeHtml).join(', ') : 'No mapped topics'}</div></div>`).join('')}</div>`;
+      const label = members.length === courses.length ? 'Shared by all selected courses' : `${members.join(' + ')} only`;
+      return `<details class="venn-region-detail"><summary><span>${escapeHtml(label)}</span><b>${topics.length}</b></summary><p>${topics.length ? topics.map(escapeHtml).join(', ') : 'No mapped topics'}</p></details>`;
+    }).join('');
+    const extra = selectedCourses.size > 3 ? `<p class="venn-note">Showing the first three of ${selectedCourses.size} selected courses. The coverage matrix below includes every visible course.</p>` : '';
+    box.innerHTML = `<svg class="venn-diagram ${courses.length === 2 ? 'two-sets' : 'three-sets'}" viewBox="0 0 900 ${courses.length === 2 ? 470 : 520}" role="img" aria-label="Venn diagram comparing ${courses.map(course => escapeHtml(course.code)).join(', ')}">${circles}${setLabels}${labels}</svg><div class="venn-region-list">${topicLists}</div>${extra}`;
   }
 
-  function renderOverlapMatrix() {
-    const courses = electiveCourses().sort((a, b) => a.code.localeCompare(b.code));
-    if (!courses.length) { $('#overlap-matrix').innerHTML = '<p class="empty-message">No elective courses to compare.</p>'; return; }
-    const head = courses.map(course => `<th scope="col" title="${escapeHtml(course.title)}">${escapeHtml(course.code.replace('CSE', ''))}</th>`).join('');
-    const rows = courses.map((course, rowIndex) => `<tr><th scope="row" title="${escapeHtml(course.title)}">${escapeHtml(course.code)} · ${escapeHtml(course.short || course.title)}</th>${courses.map((other, colIndex) => {
-      if (rowIndex === colIndex) return '<td><span class="overlap-cell diagonal">·</span></td>';
-      const count = overlapCount(course.code, other.code);
-      const heat = count ? `heat-${Math.min(5, count)}` : 'empty';
-      return `<td><button class="overlap-cell ${heat}" type="button" data-overlap-pair="${escapeHtml(course.code)}|${escapeHtml(other.code)}" aria-label="Compare ${escapeHtml(course.code)} and ${escapeHtml(other.code)}: ${count} mapped topics in common" title="${count} topics in common">${count || ''}</button></td>`;
-    }).join('')}</tr>`).join('');
-    $('#overlap-matrix').innerHTML = `<table class="overlap-table"><thead><tr><th scope="col">Course</th>${head}</tr></thead><tbody>${rows}</tbody></table>`;
+  function renderTopicCoverageMatrix() {
+    const courses = visibleCourses(true);
+    const head = courses.map(course => {
+      const planned = currentLocation(course.code) !== null;
+      const selected = selectedCourses.has(course.code);
+      return `<th scope="col" class="coverage-course-head${planned ? ' in-plan' : ''}${selected ? ' is-selected' : ''}"><button class="coverage-course-select" type="button" data-select-course="${escapeHtml(course.code)}" aria-pressed="${selected}" title="Toggle ${escapeHtml(course.code)} selection"><b>${escapeHtml(course.code)}</b><span>${escapeHtml(course.short || course.title)}</span><small>${planned ? 'In plan' : `${course.credits} credits`}</small></button><button class="matrix-detail-button" type="button" data-course-details="${escapeHtml(course.code)}">Details</button></th>`;
+    }).join('');
+    const body = DATA.topicGroups.map(group => {
+      const groupRow = `<tr class="topic-group-row"><th colspan="${courses.length + 1}">${escapeHtml(group.name)}</th></tr>`;
+      const rows = group.topics.map(id => {
+        const topic = topicById[id];
+        const status = planTopicStatus(id);
+        const touched = selectedTopicIds().has(id);
+        const selected = selectedTopic === id;
+        const cells = courses.map(course => {
+          const weight = course.topics?.[id] || 0;
+          const className = `${weight >= 2 ? 'core' : weight ? 'related' : 'none'}${currentLocation(course.code) !== null ? ' plan-col' : ''}${selectedCourses.has(course.code) ? ' selected-col' : ''}${selectedCourses.has(course.code) && weight ? ' selected-hit' : ''}`;
+          const mark = weight >= 2 ? '●' : weight ? '○' : '—';
+          const label = weight >= 2 ? 'Core coverage' : weight ? 'Related coverage' : 'Not mapped';
+          return `<td class="${className}" title="${escapeHtml(course.code)}: ${label}"><button class="coverage-cell" type="button" data-select-course="${escapeHtml(course.code)}" data-select-topic="${escapeHtml(id)}" aria-pressed="${selectedCourses.has(course.code)}" aria-label="${escapeHtml(topic.name)} in ${escapeHtml(course.code)}: ${label}; select course and topic">${mark}</button></td>`;
+        }).join('');
+        return `<tr class="topic-row ${status}${touched ? ' touched-by-selection' : ''}${selected ? ' is-selected' : ''}" data-topic-row="${escapeHtml(id)}"><th scope="row"><button class="topic-row-select" type="button" data-select-topic="${escapeHtml(id)}" aria-pressed="${selected}">${escapeHtml(topic.name)}</button><span class="plan-topic-status ${status}">${status === 'core' ? 'Core in plan' : status === 'related' ? 'Related in plan' : 'Gap in plan'}</span></th>${cells}</tr>`;
+      }).join('');
+      return groupRow + rows;
+    }).join('');
+    $('#topic-matrix').innerHTML = `<table class="topic-coverage-table"><thead><tr><th scope="col" class="topic-sticky-head">Topic · plan coverage</th>${head}</tr></thead><tbody>${body}</tbody></table>`;
+    const plannedCount = courses.filter(course => currentLocation(course.code) !== null).length;
+    $('#overlap-count').textContent = `${courses.length} courses available · ${plannedCount} in your plan · ${topicIds.length} topics`;
   }
 
   function renderOverlap() {
-    renderOverlapSelectors();
     renderVenn();
-    renderOverlapMatrix();
+    renderTopicCoverageMatrix();
   }
 
   function renderCourseTable() {
     const query = ($('#table-search').value || '').trim().toLowerCase();
-    const courses = visibleCourses(true).filter(course => {
+    const available = visibleCourses(true);
+    const courses = available.filter(course => {
       if (!query) return true;
       const topics = topicsFor(course).join(' ');
       return `${course.code} ${course.title} ${course.sourceGroup} ${topics}`.toLowerCase().includes(query);
     });
+    $('#table-count').textContent = query ? `Showing ${courses.length} of ${available.length} courses` : `${available.length} courses available`;
     const rows = courses.map(course => {
       const location = currentLocation(course.code);
       const status = location === null ? 'Not planned' : `Semester ${location + 1}`;
-      return `<tr><th scope="row"><button class="course-row-button" type="button" data-open-course="${escapeHtml(course.code)}">${escapeHtml(course.code)}</button></th><td>${escapeHtml(course.title)}</td><td>${course.credits}</td><td>${escapeHtml(course.type === 'outside' ? course.sourceGroup : course.type === 'datascience' ? 'Data Science' : course.type === 'required' ? 'Mandatory' : 'Thesis')}</td><td>${escapeHtml(status)}</td></tr>`;
+      const selected = selectedCourses.has(course.code);
+      return `<tr class="course-data-row${location !== null ? ' is-planned' : ''}${selected ? ' is-selected' : ''}"><th scope="row"><button class="course-row-button" type="button" data-select-course="${escapeHtml(course.code)}" aria-pressed="${selected}">${escapeHtml(course.code)}</button><button class="table-detail-button" type="button" data-course-details="${escapeHtml(course.code)}">Details</button></th><td>${escapeHtml(course.title)}</td><td>${course.credits}</td><td>${escapeHtml(course.type === 'outside' ? course.sourceGroup : course.type === 'datascience' ? 'Data Science' : course.type === 'required' ? 'Mandatory' : 'Thesis')}</td><td>${escapeHtml(status)}</td></tr>`;
     }).join('');
     $('#course-table').innerHTML = `<table class="course-data-table"><thead><tr><th scope="col">Code</th><th scope="col">Course</th><th scope="col">Credits</th><th scope="col">Group</th><th scope="col">In this plan</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No courses match that filter.</td></tr>'}</tbody></table>`;
   }
@@ -728,53 +797,58 @@
       renderSkillsGraph();
     }));
 
-    $('#overlap-selectors').addEventListener('change', event => {
-      const select = event.target.closest('[data-overlap-select]');
-      if (!select) return;
-      const index = Number(select.dataset.overlapSelect);
-      const next = [...state.overlapCodes];
-      while (next.length <= index) next.push('');
-      next[index] = select.value;
-      const compact = next.filter((code, at) => code && next.indexOf(code) === at);
-      state.overlapCodes = compact.slice(0, 3);
-      saveState();
-    });
-    $('#overlap-matrix').addEventListener('click', event => {
-      const cell = event.target.closest('[data-overlap-pair]');
-      if (!cell) return;
-      const [a, b] = cell.dataset.overlapPair.split('|');
-      state.overlapCodes = [a, b];
-      statusMessage = `${a} compared with ${b}`;
-      saveState();
-    });
+    $('#clear-selection').addEventListener('click', clearExplorerSelection);
 
     document.addEventListener('click', event => {
+      const details = event.target.closest('[data-course-details]');
+      if (details) { openCourse(details.dataset.courseDetails); return; }
+      const removeSelection = event.target.closest('[data-remove-selection]');
+      if (removeSelection) { toggleCourseSelection(removeSelection.dataset.removeSelection); return; }
+      const course = event.target.closest('[data-select-course]');
+      if (course) {
+        toggleCourseSelection(course.dataset.selectCourse);
+        if (course.dataset.selectTopic) {
+          selectedTopic = course.dataset.selectTopic;
+          renderExplorerViews();
+        }
+        return;
+      }
+      const topic = event.target.closest('[data-topic], [data-select-topic]');
+      if (topic) {
+        const id = topic.dataset.topic || topic.dataset.selectTopic;
+        selectedTopic = selectedTopic === id ? null : id;
+        renderExplorerViews();
+        return;
+      }
       const opener = event.target.closest('[data-open-course]');
       if (opener) { openCourse(opener.dataset.openCourse); return; }
+      const clear = event.target.closest('#clear-selection');
+      if (clear) { clearExplorerSelection(); return; }
       const taskButton = event.target.closest('[data-add-task]');
       if (taskButton) { addChecklistTask(taskButton.dataset.addTask); return; }
-      const topic = event.target.closest('[data-topic]');
-      if (topic) {
-        selectedTopic = selectedTopic === topic.dataset.topic ? null : topic.dataset.topic;
-        renderSkillsGraph();
-      }
+      if (event.target.closest('.course-dialog')) return;
+      if (!event.target.closest('button, a, input, select, textarea, summary')) clearExplorerSelection();
     });
     document.addEventListener('keydown', event => {
-      const node = event.target.closest('[data-open-course], [data-topic]');
-      if (!node || !['Enter', ' '].includes(event.key)) return;
-      if (event.target.closest('button')) return;
+      if (!['Enter', ' '].includes(event.key) || event.target.closest('button')) return;
+      const details = event.target.closest('[data-course-details]');
+      const course = event.target.closest('[data-select-course]');
+      const topic = event.target.closest('[data-topic], [data-select-topic]');
+      if (!details && !course && !topic) return;
       event.preventDefault();
-      if (node.dataset.openCourse) openCourse(node.dataset.openCourse);
+      if (details) openCourse(details.dataset.courseDetails);
+      else if (course) toggleCourseSelection(course.dataset.selectCourse);
       else {
-        selectedTopic = selectedTopic === node.dataset.topic ? null : node.dataset.topic;
-        renderSkillsGraph();
+        const id = topic.dataset.topic || topic.dataset.selectTopic;
+        selectedTopic = selectedTopic === id ? null : id;
+        renderExplorerViews();
       }
     });
 
     $('#assign-course').addEventListener('click', () => {
-      if (!selectedCode) return;
+      if (!dialogCode) return;
       const index = Number($('#assign-semester').value);
-      moveCourse(selectedCode, index);
+      moveCourse(dialogCode, index);
       $('#course-dialog').close();
     });
     $$('.close-dialog').forEach(button => button.addEventListener('click', () => $('#course-dialog').close()));
