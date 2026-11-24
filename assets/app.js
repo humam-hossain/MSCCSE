@@ -15,6 +15,7 @@
   let catalogFilter = 'all';
   let graphScope = 'plan';
   let skillLens = 'all';
+  const diagramZoom = { skills: 1, dependencies: 1, venn: 1 };
   let draggingCode = null;
   let toastTimer = 0;
   let statusMessage = 'Plan C loaded';
@@ -511,6 +512,7 @@
     svg.setAttribute('width', width);
     svg.setAttribute('height', height);
     svg.innerHTML = `${columnsMarkup}${edgeMarkup}${nodesMarkup}`;
+    applyDiagramZoom('dependencies');
     const availableCount = visibleCourses(true).length;
     $('#dependencies-count').textContent = graphScope === 'plan' ? `${courses.length} planned courses shown · ${availableCount} courses available in the catalog` : `${courses.length} of ${availableCount} available courses shown`;
   }
@@ -571,6 +573,7 @@
     svg.setAttribute('width', '2080');
     svg.setAttribute('height', height);
     svg.innerHTML = `${headers}${edges.join('')}${courseNodes}${topics}`;
+    applyDiagramZoom('skills');
     const plannedCount = courses.filter(course => currentLocation(course.code) !== null).length;
     $('#skills-count').textContent = `${courses.length} courses with topic mappings · ${visibleCourses(true).length} available overall · ${plannedCount} in this map · ${topicIds.length} topics`;
     if (selectedTopic) {
@@ -601,6 +604,7 @@
     const box = $('#venn-view');
     if (courses.length < 2) {
       box.innerHTML = '<div class="venn-empty"><b>A Venn comparison needs two courses with mapped topics.</b><p>Add more topic mappings to the course data to show a comparison here.</p></div>';
+      updateZoomReadout('venn');
       return;
     }
     const regions = new Map();
@@ -638,7 +642,42 @@
         : planCourses.length >= 2
           ? `Showing the first mapped courses in your plan: ${courses.map(course => escapeHtml(course.code)).join(', ')}. Select two or three course names below to change the comparison.`
           : `Showing available mapped courses: ${courses.map(course => escapeHtml(course.code)).join(', ')}. Select two or three course names below to compare a different set.`;
-    box.innerHTML = `<p class="venn-context">${comparison}</p><svg class="venn-diagram ${courses.length === 2 ? 'two-sets' : 'three-sets'}" viewBox="0 0 900 ${courses.length === 2 ? 470 : 520}" role="img" aria-label="Venn diagram comparing ${courses.map(course => escapeHtml(course.code)).join(', ')}">${circles}${setLabels}${labels}</svg><div class="venn-region-list">${topicLists}</div>${extra}`;
+    box.innerHTML = `<p class="venn-context">${comparison}</p><div class="venn-canvas"><svg class="venn-diagram ${courses.length === 2 ? 'two-sets' : 'three-sets'}" viewBox="0 0 900 ${courses.length === 2 ? 470 : 520}" role="img" aria-label="Venn diagram comparing ${courses.map(course => escapeHtml(course.code)).join(', ')}">${circles}${setLabels}${labels}</svg></div><div class="venn-region-list">${topicLists}</div>${extra}`;
+    applyDiagramZoom('venn');
+  }
+
+  function updateZoomReadout(target) {
+    const output = $(`[data-zoom-value="${target}"]`);
+    if (output) output.value = `${Math.round(diagramZoom[target] * 100)}%`;
+  }
+
+  function applyDiagramZoom(target) {
+    const config = {
+      skills: { frame: $('.skills-frame'), svg: $('#skills-graph') },
+      dependencies: { frame: $('#dependency-frame'), svg: $('#dependency-graph') },
+      venn: { frame: $('#venn-view .venn-canvas'), svg: $('#venn-view .venn-diagram') }
+    }[target];
+    if (!config?.frame || !config.svg) { updateZoomReadout(target); return; }
+    const viewBox = config.svg.getAttribute('viewBox')?.trim().split(/[ ,]+/).map(Number);
+    if (!viewBox || viewBox.length !== 4 || viewBox.some(value => !Number.isFinite(value)) || !config.frame.clientWidth || !config.frame.clientHeight) {
+      updateZoomReadout(target);
+      return;
+    }
+    const [, , width, height] = viewBox;
+    const fitScale = Math.min((config.frame.clientWidth - 24) / width, (config.frame.clientHeight - 24) / height);
+    const scale = Math.max(.01, fitScale * diagramZoom[target]);
+    config.svg.style.width = `${Math.round(width * scale)}px`;
+    config.svg.style.height = `${Math.round(height * scale)}px`;
+    config.frame.classList.toggle('is-zoomed', diagramZoom[target] > 1);
+    updateZoomReadout(target);
+  }
+
+  function adjustDiagramZoom(target, action) {
+    if (!(target in diagramZoom)) return;
+    if (action === 'fit') diagramZoom[target] = 1;
+    else if (action === 'in') diagramZoom[target] = Math.min(3, diagramZoom[target] * 1.2);
+    else if (action === 'out') diagramZoom[target] = Math.max(.3, diagramZoom[target] / 1.2);
+    applyDiagramZoom(target);
   }
 
   function renderTopicCoverageMatrix() {
@@ -722,6 +761,9 @@
   }
 
   function bindEvents() {
+    window.addEventListener('resize', () => {
+      requestAnimationFrame(() => ['skills', 'dependencies', 'venn'].forEach(applyDiagramZoom));
+    });
     $$('.filter-chip').forEach(button => button.addEventListener('click', () => {
       catalogFilter = button.dataset.filter;
       $$('.filter-chip').forEach(chip => { const active = chip === button; chip.classList.toggle('is-active', active); chip.setAttribute('aria-pressed', String(active)); });
@@ -784,6 +826,8 @@
     $('#clear-selection').addEventListener('click', clearExplorerSelection);
 
     document.addEventListener('click', event => {
+      const zoom = event.target.closest('[data-zoom-target]');
+      if (zoom) { adjustDiagramZoom(zoom.dataset.zoomTarget, zoom.dataset.zoomAction); return; }
       const details = event.target.closest('[data-course-details]');
       if (details) { openCourse(details.dataset.courseDetails); return; }
       const removeSelection = event.target.closest('[data-remove-selection]');

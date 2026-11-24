@@ -127,10 +127,18 @@
       <section class="explorer-panel" id="panel-skills" aria-labelledby="skills-title">
         <div class="panel-intro">
           <div><h3 id="skills-title">Course coverage by topic</h3><p>Click courses or topics to compare them. Green marks your semester plan; blue marks your current selection. Hover a course and choose Details to open its outline.</p><span class="view-count" id="skills-count"></span></div>
-          <div class="segmented" role="group" aria-label="Skill map emphasis">
-            <button type="button" data-lens="all" aria-pressed="true">All topics</button>
-            <button type="button" data-lens="academia" aria-pressed="false">Academic</button>
-            <button type="button" data-lens="industry" aria-pressed="false">Industry</button>
+          <div class="panel-tools">
+            <div class="segmented" role="group" aria-label="Skill map emphasis">
+              <button type="button" data-lens="all" aria-pressed="true">All topics</button>
+              <button type="button" data-lens="academia" aria-pressed="false">Academic</button>
+              <button type="button" data-lens="industry" aria-pressed="false">Industry</button>
+            </div>
+            <div class="diagram-zoom" role="group" aria-label="Skills map zoom">
+              <button type="button" data-zoom-target="skills" data-zoom-action="out" aria-label="Zoom out skills map">−</button>
+              <output data-zoom-value="skills">100%</output>
+              <button type="button" data-zoom-target="skills" data-zoom-action="in" aria-label="Zoom in skills map">+</button>
+              <button type="button" data-zoom-target="skills" data-zoom-action="fit">Fit</button>
+            </div>
           </div>
         </div>
         <div class="map-legend"><span><i class="coverage-dot in-plan"></i>Course in plan</span><span><i class="coverage-dot selected"></i>Selected course or topic</span><span><i class="coverage-dot core"></i>Core topic in plan</span><span><i class="coverage-dot related"></i>Related topic in plan</span><span><i class="coverage-dot gap"></i>Gap in plan</span></div>
@@ -141,6 +149,12 @@
       <section class="explorer-panel" id="panel-overlap" aria-labelledby="overlap-title">
         <div class="panel-intro">
           <div><h3 id="overlap-title">Topic overlap by course</h3><p>The Venn diagram compares up to three selected courses; the matrix shows topic coverage across every available course. Choose course names in the matrix to change the comparison.</p><span class="view-count" id="overlap-count"></span></div>
+          <div class="diagram-zoom" role="group" aria-label="Venn diagram zoom">
+            <button type="button" data-zoom-target="venn" data-zoom-action="out" aria-label="Zoom out Venn diagram">−</button>
+            <output data-zoom-value="venn">100%</output>
+            <button type="button" data-zoom-target="venn" data-zoom-action="in" aria-label="Zoom in Venn diagram">+</button>
+            <button type="button" data-zoom-target="venn" data-zoom-action="fit">Fit</button>
+          </div>
         </div>
         <div class="venn-wrap" id="venn-view" aria-live="polite"></div>
         <div class="matrix-heading"><h4>Topic coverage by course</h4><p>● Core coverage · ○ related coverage · — not mapped. Topic rows show whether your plan covers each skill. Select column headings to compare courses.</p></div>
@@ -158,9 +172,17 @@
       <section class="explorer-panel" id="panel-dependencies" aria-labelledby="dependencies-title">
         <div class="panel-intro">
           <div><h3 id="dependencies-title">What builds on what</h3><p>Click courses to select several at once. Hover a selected course and use Details to open its outline. Blank space clears your selection.</p><span class="view-count" id="dependencies-count"></span></div>
-          <div class="segmented" role="group" aria-label="Dependency graph scope">
-            <button type="button" data-graph-scope="plan" aria-pressed="true">My plan</button>
-            <button type="button" data-graph-scope="catalog" aria-pressed="false">Visible catalog</button>
+          <div class="panel-tools">
+            <div class="segmented" role="group" aria-label="Dependency graph scope">
+              <button type="button" data-graph-scope="plan" aria-pressed="true">My plan</button>
+              <button type="button" data-graph-scope="catalog" aria-pressed="false">Visible catalog</button>
+            </div>
+            <div class="diagram-zoom" role="group" aria-label="Dependency graph zoom">
+              <button type="button" data-zoom-target="dependencies" data-zoom-action="out" aria-label="Zoom out dependencies">−</button>
+              <output data-zoom-value="dependencies">100%</output>
+              <button type="button" data-zoom-target="dependencies" data-zoom-action="in" aria-label="Zoom in dependencies">+</button>
+              <button type="button" data-zoom-target="dependencies" data-zoom-action="fit">Fit</button>
+            </div>
           </div>
         </div>
         <div class="graph-legend" aria-label="Graph legend"><span><i class="legend-line formal"></i>Formal prerequisite</span><span><i class="legend-line advisory"></i>Suggested preparation</span></div>
