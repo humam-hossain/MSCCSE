@@ -15,18 +15,24 @@
   let catalogFilter = 'all';
   let graphScope = 'plan';
   let skillLens = 'all';
-  const diagramZoom = { skills: 1, dependencies: 1, venn: 1 };
+  let activeExplorerTab = 'skills';
+  const diagramZoom = { skills: 1, dependencies: 1, venn: 1, matrix: 1, table: 1 };
   let draggingCode = null;
   let toastTimer = 0;
   let statusMessage = 'Plan C loaded';
 
   function stateFromPlan(plan) {
+    const planVennCourses = [...new Set(plan.semesters.flat())].filter(code => {
+      const course = byCode.get(code);
+      return course && Object.keys(course.topics || {}).length > 0;
+    }).slice(0, 3);
     return {
       semesters: plan.semesters.map((codes, index) => ({ courses: [...codes], cap: index === 0 ? 6 : 12 })),
       showOutside: false,
       checks: {},
       customTasks: [],
       selectedCourses: ['CSE752', 'CSE754'],
+      vennCourses: planVennCourses,
       preset: plan.id
     };
   }
@@ -45,12 +51,20 @@
         return true;
       });
     }
+    const planVennCourses = [...new Set(semesters.flatMap(semester => semester.courses))].filter(code => {
+      const course = byCode.get(code);
+      return course && Object.keys(course.topics || {}).length > 0;
+    }).slice(0, 3);
     return {
       semesters,
       showOutside: Boolean(candidate.showOutside),
       checks: candidate.checks && typeof candidate.checks === 'object' ? candidate.checks : {},
       customTasks: Array.isArray(candidate.customTasks) ? candidate.customTasks.filter(task => task && typeof task.text === 'string').slice(0, 150) : [],
       selectedCourses: Array.isArray(candidate.selectedCourses) ? candidate.selectedCourses.filter(code => byCode.has(code)) : Array.isArray(candidate.overlapCodes) ? candidate.overlapCodes.filter(code => byCode.has(code)) : ['CSE752', 'CSE754'],
+      vennCourses: [...new Set((Array.isArray(candidate.vennCourses) ? candidate.vennCourses : (planVennCourses.length >= 2 ? planVennCourses : candidate.selectedCourses || ['CSE752', 'CSE754'])).filter(code => {
+        const course = byCode.get(code);
+        return course && Object.keys(course.topics || {}).length > 0;
+      }))].slice(0, 3),
       preset: DATA.plans.some(plan => plan.id === candidate.preset) ? candidate.preset : null
     };
   }
@@ -195,15 +209,15 @@
         if (!course) return '';
         return `<article class="planned-course is-planned${selectedCourses.has(code) ? ' is-selected' : ''}" draggable="true" data-drag-code="${escapeHtml(code)}">
           <button class="planned-course-main" type="button" data-select-course="${escapeHtml(code)}" aria-pressed="${selectedCourses.has(code)}" aria-label="Select ${escapeHtml(code)} ${escapeHtml(course.title)}"><b>${escapeHtml(code)} · ${course.credits} cr</b><span>${escapeHtml(course.title)}</span></button>
-          <button class="course-detail-action" type="button" data-course-details="${escapeHtml(code)}">Details</button><button class="course-remove" type="button" data-remove-course="${escapeHtml(code)}" aria-label="Remove ${escapeHtml(code)} from plan" title="Remove from plan">Remove</button>
+          <div class="planned-course-actions"><button class="course-detail-action" type="button" data-course-details="${escapeHtml(code)}">Details</button><button class="course-remove" type="button" data-remove-course="${escapeHtml(code)}" aria-label="Remove ${escapeHtml(code)} from plan" title="Remove from plan">×</button></div>
           ${courseTag(course)}
         </article>`;
       }).join('') : '<div class="semester-empty">Drag or add a course here</div>';
       const last = index === state.semesters.length - 1;
-      const removeButton = last && state.semesters.length > 1 ? `<button class="remove-semester" type="button" data-remove-semester="${index}" ${semester.courses.length ? 'disabled title="Move courses out before removing this semester"' : 'title="Remove this empty semester"'}>Remove empty semester</button>` : '';
+      const removeButton = last && state.semesters.length > 1 ? `<button class="remove-semester" type="button" data-remove-semester="${index}" aria-label="Remove empty semester ${index + 1}" ${semester.courses.length ? 'disabled title="Move courses out before removing this semester"' : 'title="Remove this empty semester"'}>×</button>` : '';
       return `<section class="semester" data-semester="${index}" aria-label="Semester ${index + 1}, ${credits} credits">
-        <header class="semester-head"><div class="semester-title"><b>Semester ${index + 1}</b><span>${credits} credits planned</span></div><label class="cap-control">cap <input type="number" min="0" max="36" step="1" value="${semester.cap}" data-cap="${index}" aria-label="Semester ${index + 1} credit warning cap"> cr</label></header>
-        <div class="semester-courses" data-drop-target="${index}">${coursesHtml}</div>${removeButton}
+        <header class="semester-head"><div class="semester-title"><b>Semester ${index + 1}</b><span>${credits} credits planned</span></div><div class="semester-head-tools"><label class="cap-control">cap <input type="number" min="0" max="36" step="1" value="${semester.cap}" data-cap="${index}" aria-label="Semester ${index + 1} credit warning cap"> cr</label>${removeButton}</div></header>
+        <div class="semester-courses" data-drop-target="${index}">${coursesHtml}</div>
       </section>`;
     }).join('');
     const total = countCredits(allScheduled());
@@ -409,6 +423,27 @@
     renderCourseTable();
   }
 
+  function renderExplorerTabs(focus = false) {
+    $$('.explorer-tab').forEach(tab => {
+      const current = tab.dataset.tab === activeExplorerTab;
+      tab.classList.toggle('is-active', current);
+      tab.setAttribute('aria-selected', String(current));
+      tab.tabIndex = current ? 0 : -1;
+    });
+    $$('.explorer-panel').forEach(panel => { panel.hidden = panel.dataset.panel !== activeExplorerTab; });
+    if (focus) $(`[data-tab="${activeExplorerTab}"]`).focus();
+    requestAnimationFrame(() => {
+      ['skills', 'venn', 'matrix', 'table', 'dependencies'].forEach(applyDiagramZoom);
+    });
+  }
+
+  function activateExplorerTab(name, focus = false) {
+    if (!['skills', 'overlap', 'table', 'dependencies'].includes(name)) return;
+    activeExplorerTab = name;
+    try { localStorage.setItem('msc-planner-explorer-tab', name); } catch (error) { /* Tabs still work without storage. */ }
+    renderExplorerTabs(focus);
+  }
+
   function renderExplorerSelection() {
     const codes = [...selectedCourses];
     $('#selection-summary').textContent = codes.length
@@ -588,22 +623,25 @@
   }
 
   function renderVenn() {
-    const mappedElectiveCodes = courses => courses
-      .map(code => byCode.get(code))
-      .filter(course => course && ['datascience', 'outside'].includes(course.type) && Object.keys(course.topics || {}).length)
-      .map(course => course.code);
-    const chosen = mappedElectiveCodes([...selectedCourses]);
-    const isComparingSelection = chosen.length >= 2;
-    const planCourses = mappedElectiveCodes(allScheduled());
-    const catalogCourses = mappedElectiveCodes(visibleCourses(true).map(course => course.code));
-    const seed = isComparingSelection
-      ? chosen
-      : [...(chosen.length ? chosen : planCourses), ...planCourses, ...catalogCourses];
-    const codes = [...new Set(seed)].slice(0, 3);
+    const options = DATA.courses
+      .filter(course => Object.keys(course.topics || {}).length)
+      .sort((a, b) => Number(currentLocation(b.code) !== null) - Number(currentLocation(a.code) !== null) || a.code.localeCompare(b.code));
+    const codes = state.vennCourses.filter(code => options.some(course => course.code === code)).slice(0, 3);
     const courses = codes.map(code => byCode.get(code)).filter(Boolean);
+    const search = ($('#venn-course-search')?.value || '').trim().toLowerCase();
+    const optionsHtml = options.filter(course => !search || `${course.code} ${course.title} ${course.short || ''}`.toLowerCase().includes(search)).map(course => {
+      const planned = currentLocation(course.code) !== null;
+      const selected = selectedCourses.has(course.code);
+      const compared = codes.includes(course.code);
+      const stateLabel = [planned ? 'In semester plan' : 'Not in semester plan', selected ? 'Selected elsewhere' : 'Not selected'].join(' · ');
+      return `<label class="venn-course-choice${planned ? ' is-planned' : ''}${selected ? ' is-selected' : ''}${compared ? ' is-compared' : ''}"><input type="checkbox" data-venn-course="${escapeHtml(course.code)}" ${compared ? 'checked' : ''} aria-label="Compare ${escapeHtml(course.code)} ${escapeHtml(course.title)} in the Venn diagram"><span class="venn-course-copy"><b>${escapeHtml(course.code)}</b><span>${escapeHtml(course.short || course.title)}</span><small>${stateLabel}</small></span></label>`;
+    }).join('');
+    $('#venn-course-options').innerHTML = optionsHtml || '<p class="venn-no-options">No mapped courses match this search.</p>';
+    const selectedCount = $('#venn-compare-count');
+    if (selectedCount) selectedCount.textContent = `${codes.length} of 3 comparison spots used · ${options.length} mapped courses available`;
     const box = $('#venn-view');
     if (courses.length < 2) {
-      box.innerHTML = '<div class="venn-empty"><b>A Venn comparison needs two courses with mapped topics.</b><p>Add more topic mappings to the course data to show a comparison here.</p></div>';
+      box.innerHTML = '<div class="venn-empty"><b>Choose at least two courses to compare.</b><p>Every course with mapped topics is available above, whether it is in your semester plan or not.</p></div>';
       updateZoomReadout('venn');
       return;
     }
@@ -618,11 +656,11 @@
       ? { 1: [265, 235, 'Only in A'], 3: [450, 235, 'Shared'], 2: [635, 235, 'Only in B'] }
       : { 1: [315, 170, 'Only in A'], 2: [585, 170, 'Only in B'], 4: [450, 402, 'Only in C'], 3: [450, 116, 'A + B'], 5: [360, 292, 'A + C'], 6: [540, 292, 'B + C'], 7: [450, 222, 'Shared by all'] };
     const circles = courses.length === 2
-      ? `<circle class="venn-circle set-a" cx="350" cy="235" r="175"/><circle class="venn-circle set-b" cx="550" cy="235" r="175"/>`
-      : `<circle class="venn-circle set-a" cx="355" cy="185" r="172"/><circle class="venn-circle set-b" cx="545" cy="185" r="172"/><circle class="venn-circle set-c" cx="450" cy="315" r="172"/>`;
+      ? `<circle class="venn-circle set-a${currentLocation(courses[0].code) !== null ? ' is-planned' : ''}" cx="350" cy="235" r="175"/><circle class="venn-circle set-b${currentLocation(courses[1].code) !== null ? ' is-planned' : ''}" cx="550" cy="235" r="175"/>`
+      : `<circle class="venn-circle set-a${currentLocation(courses[0].code) !== null ? ' is-planned' : ''}" cx="355" cy="185" r="172"/><circle class="venn-circle set-b${currentLocation(courses[1].code) !== null ? ' is-planned' : ''}" cx="545" cy="185" r="172"/><circle class="venn-circle set-c${currentLocation(courses[2].code) !== null ? ' is-planned' : ''}" cx="450" cy="315" r="172"/>`;
     const setLabels = courses.map((course, index) => {
       const points = courses.length === 2 ? [[282, 42], [570, 42]] : [[240, 40], [560, 40], [400, 492]];
-      return `<text class="venn-set-label set-${'abc'[index]}" x="${points[index][0]}" y="${points[index][1]}">${escapeHtml(course.code)}</text>`;
+      return `<text class="venn-set-label set-${'abc'[index]}${currentLocation(course.code) !== null ? ' is-planned' : ''}" x="${points[index][0]}" y="${points[index][1]}">${escapeHtml(course.code)}</text>`;
     }).join('');
     const labels = [...regions.entries()].map(([mask, topics]) => {
       const [x, y, label] = positions[mask];
@@ -634,15 +672,8 @@
       const label = members.length === courses.length ? 'Shared by all selected courses' : `${members.join(' + ')} only`;
       return `<article class="venn-region-detail"><h4><span>${escapeHtml(label)}</span><b>${topics.length}</b></h4><p>${topics.length ? topics.map(escapeHtml).join(', ') : 'No mapped topics'}</p></article>`;
     }).join('');
-    const extra = chosen.length > 3 ? `<p class="venn-note">Showing the first three selected courses (${courses.map(course => escapeHtml(course.code)).join(', ')}). The matrix below includes every available course.</p>` : '';
-    const comparison = isComparingSelection
-      ? `Comparing selected courses: ${courses.map(course => escapeHtml(course.code)).join(', ')}.`
-      : chosen.length === 1
-        ? `Showing ${courses.map(course => escapeHtml(course.code)).join(', ')}: your selected course plus mapped courses from the plan. Select another course to change the comparison.`
-        : planCourses.length >= 2
-          ? `Showing the first mapped courses in your plan: ${courses.map(course => escapeHtml(course.code)).join(', ')}. Select two or three course names below to change the comparison.`
-          : `Showing available mapped courses: ${courses.map(course => escapeHtml(course.code)).join(', ')}. Select two or three course names below to compare a different set.`;
-    box.innerHTML = `<p class="venn-context">${comparison}</p><div class="venn-canvas"><svg class="venn-diagram ${courses.length === 2 ? 'two-sets' : 'three-sets'}" viewBox="0 0 900 ${courses.length === 2 ? 470 : 520}" role="img" aria-label="Venn diagram comparing ${courses.map(course => escapeHtml(course.code)).join(', ')}">${circles}${setLabels}${labels}</svg></div><div class="venn-region-list">${topicLists}</div>${extra}`;
+    const comparison = `Comparing ${courses.map(course => escapeHtml(course.code)).join(', ')}. Solid outlines mark courses in your semester plan.`;
+    box.innerHTML = `<p class="venn-context">${comparison}</p><div class="venn-canvas" data-zoom-surface="venn" title="Scroll over the diagram to zoom; Ctrl or Command plus scroll also works."><svg class="venn-diagram ${courses.length === 2 ? 'two-sets' : 'three-sets'}" viewBox="0 0 900 ${courses.length === 2 ? 470 : 520}" role="img" aria-label="Venn diagram comparing ${courses.map(course => escapeHtml(course.code)).join(', ')}">${circles}${setLabels}${labels}</svg></div><div class="venn-region-list">${topicLists}</div>`;
     applyDiagramZoom('venn');
   }
 
@@ -652,6 +683,17 @@
   }
 
   function applyDiagramZoom(target) {
+    if (target === 'matrix' || target === 'table') {
+      const frame = target === 'matrix' ? $('#topic-matrix') : $('#course-table');
+      const table = frame?.querySelector('table');
+      if (!frame || !table || !frame.clientWidth) { updateZoomReadout(target); return; }
+      table.style.zoom = '1';
+      const fitScale = Math.min(1, Math.max(.01, (frame.clientWidth - 24) / table.scrollWidth));
+      table.style.zoom = String(fitScale * diagramZoom[target]);
+      frame.classList.toggle('is-zoomed', diagramZoom[target] > 1);
+      updateZoomReadout(target);
+      return;
+    }
     const config = {
       skills: { frame: $('.skills-frame'), svg: $('#skills-graph') },
       dependencies: { frame: $('#dependency-frame'), svg: $('#dependency-graph') },
@@ -681,11 +723,12 @@
   }
 
   function renderTopicCoverageMatrix() {
-    const courses = visibleCourses(true);
+    const courses = DATA.courses.filter(course => Object.keys(course.topics || {}).length > 0);
     const head = courses.map(course => {
       const planned = currentLocation(course.code) !== null;
       const selected = selectedCourses.has(course.code);
-      return `<th scope="col" class="coverage-course-head${planned ? ' in-plan' : ''}${selected ? ' is-selected' : ''}"><button class="coverage-course-select" type="button" data-select-course="${escapeHtml(course.code)}" aria-pressed="${selected}" title="Toggle ${escapeHtml(course.code)} selection"><b>${escapeHtml(course.code)}</b><span>${escapeHtml(course.short || course.title)}</span><small>${planned ? 'In plan' : `${course.credits} credits`}</small></button><button class="matrix-detail-button" type="button" data-course-details="${escapeHtml(course.code)}">Details</button></th>`;
+      const compared = state.vennCourses.includes(course.code);
+      return `<th scope="col" class="coverage-course-head${planned ? ' in-plan' : ''}${selected ? ' is-selected' : ''}${compared ? ' is-compared' : ''}"><button class="coverage-course-select" type="button" data-select-course="${escapeHtml(course.code)}" aria-pressed="${selected}" title="Toggle ${escapeHtml(course.code)} in the plan comparison"><b>${escapeHtml(course.code)}</b><span>${escapeHtml(course.short || course.title)}</span><small>${planned ? 'In plan' : `${course.credits} credits`}${compared ? ' · In Venn' : ''}</small></button><button class="matrix-detail-button" type="button" data-course-details="${escapeHtml(course.code)}">Details</button></th>`;
     }).join('');
     const body = DATA.topicGroups.map(group => {
       const groupRow = `<tr class="topic-group-row"><th colspan="${courses.length + 1}">${escapeHtml(group.name)}</th></tr>`;
@@ -696,7 +739,7 @@
         const selected = selectedTopic === id;
         const cells = courses.map(course => {
           const weight = course.topics?.[id] || 0;
-          const className = `${weight >= 2 ? 'core' : weight ? 'related' : 'none'}${currentLocation(course.code) !== null ? ' plan-col' : ''}${selectedCourses.has(course.code) ? ' selected-col' : ''}${selectedCourses.has(course.code) && weight ? ' selected-hit' : ''}`;
+          const className = `${weight >= 2 ? 'core' : weight ? 'related' : 'none'}${currentLocation(course.code) !== null ? ' plan-col' : ''}${selectedCourses.has(course.code) ? ' selected-col' : ''}${selectedCourses.has(course.code) && weight ? ' selected-hit' : ''}${state.vennCourses.includes(course.code) ? ' venn-col' : ''}${state.vennCourses.includes(course.code) && weight ? ' venn-hit' : ''}`;
           const mark = weight >= 2 ? '●' : weight ? '○' : '—';
           const label = weight >= 2 ? 'Core coverage' : weight ? 'Related coverage' : 'Not mapped';
           return `<td class="${className}" title="${escapeHtml(course.code)}: ${label}"><button class="coverage-cell" type="button" data-select-course="${escapeHtml(course.code)}" data-select-topic="${escapeHtml(id)}" aria-pressed="${selectedCourses.has(course.code)}" aria-label="${escapeHtml(topic.name)} in ${escapeHtml(course.code)}: ${label}; select course and topic">${mark}</button></td>`;
@@ -706,6 +749,7 @@
       return groupRow + rows;
     }).join('');
     $('#topic-matrix').innerHTML = `<table class="topic-coverage-table"><thead><tr><th scope="col" class="topic-sticky-head">Topic · plan coverage</th>${head}</tr></thead><tbody>${body}</tbody></table>`;
+    applyDiagramZoom('matrix');
     const plannedCount = courses.filter(course => currentLocation(course.code) !== null).length;
     $('#overlap-count').textContent = `${courses.length} courses available · ${plannedCount} in your plan · ${topicIds.length} topics`;
   }
@@ -731,6 +775,7 @@
       return `<tr class="course-data-row${location !== null ? ' is-planned' : ''}${selected ? ' is-selected' : ''}"><th scope="row"><button class="course-row-button" type="button" data-select-course="${escapeHtml(course.code)}" aria-pressed="${selected}">${escapeHtml(course.code)}</button><button class="table-detail-button" type="button" data-course-details="${escapeHtml(course.code)}">Details</button></th><td>${escapeHtml(course.title)}</td><td>${course.credits}</td><td>${escapeHtml(course.type === 'outside' ? course.sourceGroup : course.type === 'datascience' ? 'Data Science' : course.type === 'required' ? 'Mandatory' : 'Thesis')}</td><td>${escapeHtml(status)}</td></tr>`;
     }).join('');
     $('#course-table').innerHTML = `<table class="course-data-table"><thead><tr><th scope="col">Code</th><th scope="col">Course</th><th scope="col">Credits</th><th scope="col">Group</th><th scope="col">In this plan</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No courses match that filter.</td></tr>'}</tbody></table>`;
+    applyDiagramZoom('table');
   }
 
   function renderSupportingNotes() {
@@ -762,8 +807,34 @@
 
   function bindEvents() {
     window.addEventListener('resize', () => {
-      requestAnimationFrame(() => ['skills', 'dependencies', 'venn'].forEach(applyDiagramZoom));
+      requestAnimationFrame(() => ['skills', 'venn', 'matrix', 'table', 'dependencies'].forEach(applyDiagramZoom));
     });
+    $('.explorer-tabs').addEventListener('click', event => {
+      const tab = event.target.closest('[data-tab]');
+      if (tab) activateExplorerTab(tab.dataset.tab);
+    });
+    $('.explorer-tabs').addEventListener('keydown', event => {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+      const tabs = $$('.explorer-tab');
+      const current = tabs.indexOf(document.activeElement);
+      let next = current;
+      if (event.key === 'ArrowLeft') next = (current + tabs.length - 1) % tabs.length;
+      if (event.key === 'ArrowRight') next = (current + 1) % tabs.length;
+      if (event.key === 'Home') next = 0;
+      if (event.key === 'End') next = tabs.length - 1;
+      event.preventDefault();
+      activateExplorerTab(tabs[next].dataset.tab, true);
+    });
+    $('#explorer').addEventListener('wheel', event => {
+      const surface = event.target.closest('[data-zoom-surface]');
+      if (!surface) return;
+      const target = surface.dataset.zoomSurface;
+      const modifierZoom = event.ctrlKey || event.metaKey;
+      const wheelZoom = ['skills', 'venn', 'dependencies'].includes(target);
+      if (!modifierZoom && !wheelZoom) return;
+      event.preventDefault();
+      adjustDiagramZoom(target, event.deltaY < 0 ? 'in' : 'out');
+    }, { passive: false });
     $$('.filter-chip').forEach(button => button.addEventListener('click', () => {
       catalogFilter = button.dataset.filter;
       $$('.filter-chip').forEach(chip => { const active = chip === button; chip.classList.toggle('is-active', active); chip.setAttribute('aria-pressed', String(active)); });
@@ -772,6 +843,23 @@
 
     $('#course-search').addEventListener('input', renderCatalog);
     $('#table-search').addEventListener('input', renderCourseTable);
+    $('#venn-course-search').addEventListener('input', renderVenn);
+    $('#venn-course-options').addEventListener('change', event => {
+      const input = event.target.closest('[data-venn-course]');
+      if (!input) return;
+      const next = new Set(state.vennCourses);
+      if (input.checked) {
+        if (next.size >= 3) {
+          input.checked = false;
+          showToast('The Venn diagram compares up to three courses. Uncheck one to choose another.');
+          return;
+        }
+        next.add(input.dataset.vennCourse);
+      } else next.delete(input.dataset.vennCourse);
+      state.vennCourses = [...next];
+      statusMessage = `${state.vennCourses.length} Venn comparison course${state.vennCourses.length === 1 ? '' : 's'} selected`;
+      saveState();
+    });
     $('#outside-toggle').addEventListener('change', event => {
       state.showOutside = event.target.checked;
       statusMessage = state.showOutside ? 'Outside courses are visible' : 'Outside courses are hidden';
@@ -929,7 +1017,12 @@
   }
 
   function init() {
+    try {
+      const savedTab = localStorage.getItem('msc-planner-explorer-tab');
+      if (['skills', 'overlap', 'table', 'dependencies'].includes(savedTab)) activeExplorerTab = savedTab;
+    } catch (error) { /* Use the default tab when storage is unavailable. */ }
     bindEvents();
+    renderExplorerTabs();
     renderAll();
     if (location.hash.startsWith('#plan=')) statusMessage = 'Shared plan loaded';
     else statusMessage = state.preset ? `Plan ${state.preset} loaded · saved in this browser` : 'Saved in this browser';
